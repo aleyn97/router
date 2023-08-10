@@ -1,0 +1,19 @@
+plugins {
+    id 'kotlin'
+    id 'maven-publish'
+}
+
+group = lrouterGroup
+version = lrouterVersion
+project.ext.artifactId = 'processor'
+
+dependencies {
+    implementation libs.gson
+    //noinspection GradleDependency
+    implementation libs.symbol.processing.api
+    implementation project(path: ':annotation')
+    implementation libs.kotlinpoet
+
+}
+
+apply from: '../publishing.gradle'

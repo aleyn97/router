@@ -1,0 +1,47 @@
+plugins {
+    id 'kotlin'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'maven-publish'
+}
+
+group = lrouterGroup
+version = lrouterVersion
+project.ext.artifactId = 'plugin'
+
+sourceSets {
+    main.java.srcDirs += "$buildDir/generated/build/com/aleyn/plugin"
+}
+
+def map = new HashMap<String, String>()
+map.put('version', "$lrouterVersion")
+map.put('routerDepend', "$lrouterGroup:core:")
+map.put('processorDepend', "$lrouterGroup:processor:")
+
+tasks.register('genVersion', Copy) {
+    from 'src/main/build'
+    into "$buildDir/generated/build/com/aleyn/plugin"
+    expand(map)
+    filteringCharset = 'UTF-8'
+}
+
+compileKotlin.dependsOn('genVersion')
+
+tasks.register('copyJar', Copy) {
+    from "${buildDir}/libs"
+    into "../plugins"
+    filteringCharset = 'UTF-8'
+    group = 'publishing'
+}
+
+jar.finalizedBy('copyJar')
+
+dependencies {
+    implementation gradleApi()
+    compileOnly libs.gradle
+    compileOnly libs.symbol.processing.gradle.plugin
+    implementation libs.asmCore
+    implementation libs.asm.commons
+    implementation libs.gson
+}
+
+apply from: '../publishing.gradle'

@@ -1,0 +1,19 @@
+plugins.apply('maven-publish')
+
+afterEvaluate {
+    publishing {
+        publications {
+            def hasLibrary = project.plugins.hasPlugin("com.android.library")
+            release(MavenPublication) {
+                if (hasLibrary) {
+                    from components.release
+                } else {
+                    from components.kotlin
+                }
+                groupId group
+                artifactId project.ext.artifactId
+                version version
+            }
+        }
+    }
+}

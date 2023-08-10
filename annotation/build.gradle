@@ -1,0 +1,10 @@
+plugins {
+    id 'kotlin'
+    id 'maven-publish'
+}
+
+group = lrouterGroup
+version = lrouterVersion
+project.ext.artifactId = 'annotation'
+
+apply from: '../publishing.gradle'

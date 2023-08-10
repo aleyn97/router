@@ -1,0 +1,31 @@
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        maven { url "https://maven.aliyun.com/repository/public/" }
+        maven { url "https://maven.aliyun.com/repository/central/" }
+        maven { url 'https://jitpack.io' }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        maven { url "https://maven.aliyun.com/repository/public/" }
+        maven { url "https://maven.aliyun.com/repository/central/" }
+        maven { url 'https://jitpack.io' }
+    }
+}
+rootProject.name = "LRouter"
+include ':app'
+if (Boolean.valueOf(useLocal)) {
+    println(useLocal)
+    include ':router'
+    include ':processor'
+    include ':annotation'
+    include ':plugin'
+}
+include ':module_first'
+include ':lib_base'
+include ':module_two'
+include ':module_main'

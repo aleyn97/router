@@ -1,0 +1,40 @@
+[versions]
+appcompatVersion = "1.6.1"
+asmVersion = "9.5"
+constraintlayoutVersion = "2.1.4"
+coreKtxVersion = "1.10.1"
+espressoCoreVersion = "3.5.1"
+gradleVersion = "8.0.2"
+gsonVersion = "2.9.1"
+junit = "1.1.5"
+junitVersion = "4.13.2"
+kotlinpoetVersion = "1.14.2"
+lifecycleRuntimeKtxVersion = "2.6.1"
+materialVersion = "1.9.0"
+symbolProcessingGradlePluginVersion = "1.8.20-1.0.11"
+agp = "8.0.2"
+org-jetbrains-kotlin-android = "1.8.20"
+
+[libraries]
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+asmCore = { module = "org.ow2.asm:asm", version.ref = "asmVersion" }
+asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asmVersion" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayoutVersion" }
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+ext-junit = { module = "androidx.test.ext:junit", version.ref = "junit" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradleVersion" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
+junit = { module = "junit:junit", version.ref = "junitVersion" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoetVersion" }
+lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
+material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "symbolProcessingGradlePluginVersion" }
+symbol-processing-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "symbolProcessingGradlePluginVersion" }
+
+[plugins]
+com-android-library = { id = "com.android.library", version.ref = "agp" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
+
+[bundles]
+

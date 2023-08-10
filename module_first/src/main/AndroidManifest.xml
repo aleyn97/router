@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".ui.DIActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.ResultActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.ParamActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.SimpleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.FirstActivity"
+            android:exported="true" />
+    </application>
+
+</manifest>
