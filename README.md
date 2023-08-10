@@ -45,7 +45,7 @@
 
 LRouter Last Version:
 
-[![](https://jitpack.io/v/com.gitee.aleyn/router.svg)](https://jitpack.io/#com.gitee.aleyn/router)
+[![](https://jitpack.io/v/aleyn97/router.svg)](https://jitpack.io/#aleyn97/router)
 
 - setting.gradle:
 
