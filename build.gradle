@@ -3,7 +3,7 @@
 buildscript {
     dependencies {
         if (Boolean.valueOf(useLocal)) {
-            classpath files("plugins/plugin-${lrouterVersion}.jar")
+            classpath files("plugins/plugin.jar")
         } else {
             classpath "${lrouterGroup}:plugin:${lrouterVersion}"
         }

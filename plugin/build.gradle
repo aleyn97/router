@@ -27,11 +27,14 @@ tasks.register('genVersion', Copy) {
 compileKotlin.dependsOn('genVersion')
 
 tasks.register('copyJar', Copy) {
-    from "${buildDir}/libs"
+    from "${buildDir}/libs/plugin-${lrouterVersion}.jar"
     into "../plugins"
     filteringCharset = 'UTF-8'
-    group = 'publishing'
+    rename { String name ->
+        name.replace("-${lrouterVersion}", '')
+    }
 }
+
 
 jar.finalizedBy('copyJar')
 

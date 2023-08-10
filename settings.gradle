@@ -19,7 +19,6 @@ dependencyResolutionManagement {
 rootProject.name = "LRouter"
 include ':app'
 if (Boolean.valueOf(useLocal)) {
-    println(useLocal)
     include ':router'
     include ':processor'
     include ':annotation'
