@@ -7,7 +7,7 @@
 之前一直在用阿里开源的 [ARouter](https://github.com/alibaba/ARouter/tree/master)路由。 随着 Gradle
 版本迭代以及新技术的不断推出。ARouter 开始有些不太适合了。原因如下：
 
-1. Gradle 8.0 以上直接废弃了 Transform，ARouter 路由插件不能用了。
+1. AGP 8.0 以上直接废弃了 Transform，ARouter 路由插件不能用了。
 2. 如果不用插件自动注册，启动时扫描 Dex 文件，很影响启动速度
 3. ARouter 是基于Java 开发的，用的Java 注解处理器，如果是Kotlin 项目 KAPT 处理很慢，有更快的 KSP 不能支持
 4. 路由过程中用到了反射
@@ -18,13 +18,13 @@
 
 使用需知：
 
-- LRouter 仅支持 Gradle 7.4 及以上更高版本。7.4 以下就不做支持了。
+- LRouter 仅支持 AGP 7.4 及以上更高版本。7.4 以下就不做支持了。
 - 工程必须使用 Kotlin (可以Java & Kotlin 混编但不能没有 Kotlin)
 - 必须添加 KSP 支持
 
-说明下不支持低版本Gradle的原因：ARouter 官方近两年没更新过库了，感觉官方没有更新的想法了。
-写 LRouter 的初衷也是为了做 ARouter 的延续。不至于让在 Gradle 8 以上没有合适的路由框架可用。
-如果项目是低 Gradle 版本可以继续用 ARouter。
+说明下不支持低版本 AGP 的原因：ARouter 官方近两年没更新过库了，感觉官方没有更新的想法了。
+写 LRouter 的初衷也是为了做 ARouter 的延续。不至于让在 AGP 8 以上没有合适的路由框架可用。
+如果项目是低 AGP 版本可以继续用 ARouter。
 
 ## 功能介绍
 

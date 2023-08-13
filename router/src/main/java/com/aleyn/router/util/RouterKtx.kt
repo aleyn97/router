@@ -13,8 +13,8 @@ import com.aleyn.router.core.Navigator
 /**
  * 简易导航跳转
  */
-fun LRouter.navigator(url: String) {
-    build(url).navigation()
+fun LRouter.navigator(url: String, block: Navigator.Builder.() -> Unit = {}) {
+    build(url).apply(block).navigation()
 }
 
 fun LRouter.getFragment(url: String) = build(url).getFragment()

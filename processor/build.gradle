@@ -3,6 +3,10 @@ plugins {
     id 'maven-publish'
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
 group = lrouterGroup
 version = lrouterVersion
 project.ext.artifactId = 'processor'

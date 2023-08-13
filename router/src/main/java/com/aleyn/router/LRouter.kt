@@ -3,7 +3,6 @@ package com.aleyn.router
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.Keep
-import com.aleyn.router.core.LRouterInitializer
 import com.aleyn.router.core.LRouterInterceptor
 import com.aleyn.router.core.NavCallback
 import com.aleyn.router.core.Navigator
@@ -11,7 +10,6 @@ import com.aleyn.router.core.RouteMeta
 import com.aleyn.router.core.RouterController
 import com.aleyn.router.core.RouterUrl
 import com.aleyn.router.core.getRouterKey
-import com.aleyn.router.data.InitializerData
 import com.aleyn.router.data.InterceptorData
 import com.aleyn.router.inject.Core
 import com.aleyn.router.inject.injectAutowired

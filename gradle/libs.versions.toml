@@ -12,8 +12,8 @@ kotlinpoetVersion = "1.14.2"
 lifecycleRuntimeKtxVersion = "2.6.1"
 materialVersion = "1.9.0"
 symbolProcessingGradlePluginVersion = "1.8.20-1.0.11"
-agp = "8.0.2"
-org-jetbrains-kotlin-android = "1.8.20"
+agp = "7.4.0"
+kotlinVersion = "1.8.20"
 
 [libraries]
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -33,8 +33,11 @@ symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-ap
 symbol-processing-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "symbolProcessingGradlePluginVersion" }
 
 [plugins]
-com-android-library = { id = "com.android.library", version.ref = "agp" }
-org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+google-ksp = { id = "com.google.devtools.ksp", version.ref = "symbolProcessingGradlePluginVersion" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlinVersion" }
 
 [bundles]
 

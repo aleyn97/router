@@ -5,6 +5,7 @@ import com.aleyn.plugin.ROUTER_PROCESSOR
 import com.aleyn.plugin.ROUTER_VERSION
 import com.aleyn.router.plug.task.GenLRouterDocTask
 import com.aleyn.router.plug.task.LRouterClassTask
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.ScopedArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ScopedArtifacts
@@ -26,10 +27,6 @@ class RouterPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
 
-        val gradleVersion = project.gradle.gradleVersion
-
-        require(gradleVersion >= "7.4") { "GradleVersion must be at least 7.4 or higher" }
-
         val isApp = project.plugins.hasPlugin(AppPlugin::class.java)
 
         val isAndroid = (isApp
@@ -47,13 +44,21 @@ class RouterPlugin : Plugin<Project> {
 
 
         if (!isApp) return
-        println("-------- LRouter Current environment --------")
-        println("Gradle Version:$gradleVersion")
-        println("JDK Version:${System.getProperty("java.version")}")
-        println("LRouter Version:${ROUTER_VERSION}")
-        println("LRouter Auto:$isAuto")
 
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        val gradleVersion = project.gradle.gradleVersion
+
+        println("-------- LRouter Current environment --------")
+        println("Gradle Version $gradleVersion")
+        println("${androidComponents.pluginVersion}")
+        println("JDK Version ${System.getProperty("java.version")}")
+        println("LRouter Version $ROUTER_VERSION")
+        println("LRouter Auto $isAuto")
+
+        require(androidComponents.pluginVersion >= AndroidPluginVersion(7, 4, 0)) {
+            "AGP version must be at least 7.4 or higher. current version ${androidComponents.pluginVersion}"
+        }
+
 
         androidComponents.onVariants { variant ->
             val taskProvider = project.tasks.register(
