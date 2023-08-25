@@ -37,6 +37,8 @@ fun RouterMeta.RouterAutowired.generatorClass(
     val simpleName = routerAutowired.simpleName
     val list = routerAutowired.list
 
+    val parentDeclaration = routerAutowired.list.firstOrNull()?.second?.parent as? KSClassDeclaration
+
     val className = simpleName + AUTOWIRED_SUFFIX
 
     val fileBuilder = FileSpec.builder(pkgName, className)
@@ -47,10 +49,15 @@ fun RouterMeta.RouterAutowired.generatorClass(
     val classSpec = TypeSpec.objectBuilder(className)
         .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
 
+    val typeParams = if (parentDeclaration?.typeParameters.isNullOrEmpty()) "" else
+        parentDeclaration!!.typeParameters.joinToString(", ", "<", ">") {
+            "*"
+        }
+
     val funSpec = FunSpec.builder(FUN_INJECT_NAME)
         .jvmStatic()
         .addParameter("target", Any::class)
-        .beginControlFlow("\nif (target is ${simpleName})")
+        .beginControlFlow("\nif (target is ${simpleName}$typeParams)")
 
     list.forEach { item ->
         val declaration = item.second

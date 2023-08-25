@@ -51,6 +51,7 @@ class MainFragment : Fragment(R.layout.fragment_home) {
         binding.btnParamNav.setOnClickListener {
             val userData = UserData("Aleyn", 25, 1)
             LRouter.build("/First/Param?sex=1")
+                .withString("baseParam", "from main")
                 .withString("nickname", "Aleyn")
                 .withInt("age", 26)
                 .withAny("userData", userData) // Any 参数

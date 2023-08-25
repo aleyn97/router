@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'aleyn-router'
 }
 
 android {
@@ -26,6 +27,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -36,10 +40,10 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-    if (Boolean.valueOf(useLocal)) {
+    /*if (Boolean.valueOf(useLocal)) {
         compileOnly project(':router')
     } else {
         compileOnly "${lrouterGroup}:core:${lrouterVersion}"
-    }
+    }*/
 
 }
