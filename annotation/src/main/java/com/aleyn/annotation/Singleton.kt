@@ -20,6 +20,6 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 annotation class Singleton(
     val bind: KClass<*> = Unit::class,
-    val lazy: Boolean = false
+    val lazy: Boolean = true
 )
 

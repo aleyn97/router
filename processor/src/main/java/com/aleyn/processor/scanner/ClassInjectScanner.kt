@@ -58,7 +58,7 @@ class ClassInjectScanner(private val logger: KSPLogger) {
         when (annotation.shortName.asString()) {
             Singleton::class.simpleName -> {
                 keyword = SINGLETON
-                lazy = annotation.arguments.getArgValue("lazy") ?: false
+                lazy = annotation.arguments.getArgValue("lazy") ?: true
                 declarationBind = annotation.arguments.getArgValue<KSType>("bind")
             }
 

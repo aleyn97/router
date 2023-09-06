@@ -51,7 +51,7 @@ abstract class ICar {
 }
 
 @Qualifier("car2")
-@Singleton(lazy = true)
+@Singleton(lazy = false)
 class Car2 : ICar() {
     override val name = "Car2"
 }

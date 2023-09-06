@@ -19,4 +19,10 @@ internal class InitializerData(
             else -> -1
         }
     }
+
+    override fun toString(): String {
+        return """
+            priority=${priority},async=${async}
+        """.trimIndent()
+    }
 }

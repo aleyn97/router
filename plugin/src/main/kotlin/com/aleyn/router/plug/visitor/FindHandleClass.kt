@@ -61,18 +61,17 @@ class FindHandleClass(private val outModel: ArrayList<HandleModel>) : ClassNode(
         }
 
         if (!initAnn?.desc.isNullOrBlank() && !routerInitializer.isNullOrBlank()) {
-            var priority = 0
+            var priority: Byte = 0
             var async = false
             initAnn!!.values?.forEachIndexed { index, any ->
                 if (index % 2 == 1) return@forEachIndexed
                 if (any == "priority") {
-                    priority = (initAnn.values.getOrNull(index + 1) as? Int) ?: 0
-                }
-                if (any == "async") {
+                    priority = (initAnn.values.getOrNull(index + 1) as? Byte) ?: 0
+                } else if (any == "async") {
                     async = (initAnn.values.getOrNull(index + 1) as? Boolean) ?: false
                 }
             }
-            outModel.add(HandleModel.Initializer(priority, if (async) 1 else 0, name))
+            outModel.add(HandleModel.Initializer(priority.toInt(), if (async) 1 else 0, name))
         }
     }
 

@@ -6,6 +6,7 @@ import android.os.Looper
 import com.aleyn.router.data.InitializerData
 import com.aleyn.router.data.InterceptorData
 import com.aleyn.router.executor.DefaultPoolExecutor
+import com.aleyn.router.inject.Core
 import com.aleyn.router.inject.initModuleRouter
 import com.aleyn.router.inject.registerAllInitializer
 import com.aleyn.router.inject.registerIntercept
@@ -60,19 +61,19 @@ internal object RouterController {
         // 注册所有初始化器
         registerAllInitializer()
         // 执行各模块初始化器
-        async {
-            initializerModule.forEach {
-                if (it.async) {
-                    it.routerInitializer.create(context)
-                } else {
-                    main { it.routerInitializer.create(context) }
-                }
+        initializerModule.forEach {
+            if (it.async) {
+                async { it.routerInitializer.create(context) }
+            } else {
+                it.routerInitializer.create(context)
             }
         }
+        initializerModule.clear()
         //注册 路由 拦截器 信息
         async {
             initModuleRouter()
             registerIntercept()
+            Core.createEagerInstances()
         }
     }
 

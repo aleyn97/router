@@ -37,7 +37,7 @@ fun paramOf(vararg params: Any?) = Parameters(params.toMutableList())
  */
 inline fun <reified T> lRouterSingle(
     qualifier: Qualifier? = null,
-    lazy: Boolean = false,
+    lazy: Boolean = true,
     noinline definition: Def<T>
 ) {
     val def = createDefinition(Kind.SINGLETON, qualifier, definition)

@@ -37,7 +37,8 @@ fun RouterMeta.RouterAutowired.generatorClass(
     val simpleName = routerAutowired.simpleName
     val list = routerAutowired.list
 
-    val parentDeclaration = routerAutowired.list.firstOrNull()?.second?.parent as? KSClassDeclaration
+    val parentDeclaration =
+        routerAutowired.list.firstOrNull()?.second?.parent as? KSClassDeclaration
 
     val className = simpleName + AUTOWIRED_SUFFIX
 
@@ -166,8 +167,8 @@ private fun RouterMeta.Module.genDefinition(fileBuilder: FileSpec.Builder): FunS
                 fileBuilder.addImport("com.aleyn.router.inject.qualifier", "sq")
                 "sq(\"${it.qualifier}\")"
             }
-            val lazy = if (it.isType(SINGLETON) && it.lazy == true) {
-                (if (qualifier == "") "" else ", ") + "lazy = true"
+            val lazy = if (it.isType(SINGLETON)) {
+                (if (qualifier.isBlank()) "" else ", ") + "lazy = ${it.lazy}"
             } else ""
 
             fileBuilder.addImport(it.packageName, it.label)

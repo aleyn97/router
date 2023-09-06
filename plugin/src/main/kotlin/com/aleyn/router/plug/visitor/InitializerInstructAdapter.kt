@@ -18,8 +18,8 @@ class InitializerInstructAdapter(
 
     override fun visitCode() {
         initializerClass?.forEach {
-            mv.visitIntInsn(Opcodes.BIPUSH, it.priority)
-            mv.visitIntInsn(Opcodes.T_BOOLEAN, it.async)
+            iconst(it.priority)
+            mv.visitIntInsn(Opcodes.BIPUSH, it.async)
             mv.visitTypeInsn(Opcodes.NEW, it.className)
             dup()
             invokespecial(it.className, "<init>", "()V", false)

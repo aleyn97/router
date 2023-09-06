@@ -141,11 +141,15 @@ object LRouter {
         return Core.getOrNull(clazz, qualifier)
     }
 
+    inline fun <reified T> getByType(qualifier: Qualifier? = null): T? {
+        return Core.getOrNull(T::class, qualifier)
+    }
+
     /**
      * 获取注入类
      */
     @JvmStatic
-    fun <T> getByJava(clazz: Class<*>, qualifier: Qualifier? = null): T? {
+    fun <T> getByJava(clazz: Class<*>, qualifier: Qualifier?): T? {
         return Core.getOrNull(clazz.kotlin, qualifier)
     }
 
