@@ -124,7 +124,7 @@ class Navigator private constructor(
             resultLauncher.launch(intent, optionsCompat)
         }
         navCallback?.onArrival(this)
-        if ((enterAnim != 0 || exitAnim != 0) && currentContext is Activity) {
+        if ((enterAnim != -1 || exitAnim != -1) && currentContext is Activity) {
             currentContext.overridePendingTransition(enterAnim, exitAnim)
         }
     }
@@ -158,6 +158,7 @@ class Navigator private constructor(
             this.mBundle.putAll(navigator.bundle)
             this.flags = navigator.flags
             this.enterAnim = navigator.enterAnim
+            this.exitAnim = navigator.exitAnim
             this.optionsCompat = navigator.optionsCompat
             this.action = navigator.action
             this.resultLauncher = navigator.resultLauncher
