@@ -6,9 +6,8 @@ plugins {
 kotlin {
     jvmToolchain(11)
 }
-
-group = lrouterGroup
-version = lrouterVersion
+group = libs.versions.lrouterGroup.get()
+version = libs.versions.lrouterVersion.get()
 project.ext.artifactId = 'annotation'
 
 apply from: '../publishing.gradle'

@@ -15,20 +15,15 @@ import org.objectweb.asm.commons.InstructionAdapter
 class InterceptInstructAdapter(
     api: Int,
     methodVisitor: MethodVisitor,
-    private val interceptClass: List<HandleModel.Intercept>?,
+    private val moduleClass: List<HandleModel.Module>?
 ) : InstructionAdapter(api, methodVisitor) {
 
     override fun visitCode() {
-        interceptClass?.forEach {
-            mv.visitIntInsn(BIPUSH, it.priority.toInt())
-            mv.visitTypeInsn(NEW, it.className)
-            dup()
-            invokespecial(it.className, "<init>", "()V", false)
-            mv.visitTypeInsn(CHECKCAST, "com/aleyn/router/core/LRouterInterceptor")
+        moduleClass?.forEach {
             invokestatic(
-                "com/aleyn/router/LRouter",
+                it.className,
                 "addInterceptor",
-                "(BLcom/aleyn/router/core/LRouterInterceptor;)V",
+                "()V",
                 false
             )
         }

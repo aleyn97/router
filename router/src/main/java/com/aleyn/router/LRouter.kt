@@ -3,6 +3,7 @@ package com.aleyn.router
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.Keep
+import com.aleyn.router.core.LRouterInitializer
 import com.aleyn.router.core.LRouterInterceptor
 import com.aleyn.router.core.NavCallback
 import com.aleyn.router.core.Navigator
@@ -94,6 +95,18 @@ object LRouter {
     @JvmStatic
     fun addInterceptor(priority: Byte, interceptor: LRouterInterceptor) {
         RouterController.routerInterceptors.add(InterceptorData(priority, interceptor))
+    }
+
+    /**
+     * 注册初始化器
+     */
+    @JvmStatic
+    fun registerInitializer(
+        priority: Byte,
+        async: Boolean,
+        initializer: LRouterInitializer
+    ) {
+        RouterController.registerInitializer(priority, async, initializer)
     }
 
     /**

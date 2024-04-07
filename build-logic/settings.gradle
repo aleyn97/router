@@ -1,5 +1,4 @@
 pluginManagement {
-    if (useLocal) includeBuild("build-logic")
     repositories {
         google()
         gradlePluginPortal()
@@ -16,15 +15,11 @@ dependencyResolutionManagement {
         maven { url "https://maven.aliyun.com/repository/central/" }
         maven { url 'https://jitpack.io' }
     }
+    versionCatalogs {
+        libs {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
 }
-rootProject.name = "LRouter"
-include ':app'
-if (Boolean.valueOf(useLocal)) {
-    include ':router'
-    include ':processor'
-    include ':annotation'
-}
-include ':module_first'
-include ':lib_base'
-include ':module_two'
-include ':module_main'
+rootProject.name = "build-logic"
+include ':plugin'

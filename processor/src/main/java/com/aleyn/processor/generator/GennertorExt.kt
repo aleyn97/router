@@ -5,9 +5,13 @@ import com.aleyn.processor.scanner.SINGLETON
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.squareup.kotlinpoet.BYTE
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.MAP
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.jvm.jvmName
 import com.squareup.kotlinpoet.jvm.jvmStatic
@@ -119,8 +123,11 @@ fun RouterMeta.Module.generatorModule(
 ) {
     logger.logging("start generator${moduleName}Module")
     val pkgName = "com.module.router"
-
-    if (this.router.isEmpty() && this.definitions.isEmpty()) return
+    if (this.router.isEmpty()
+        && this.definitions.isEmpty()
+        && this.interceptors.isEmpty()
+        && this.initializers.isEmpty()
+    ) return
 
     val className = moduleName.orEmpty() + MODULE_ROUTER_CLASS_SUFFIX
 
@@ -145,6 +152,8 @@ fun RouterMeta.Module.generatorModule(
     val fileSpec = fileBuilder
         .addFunction(routerFunSpec.build())
         .addFunction(genDefinition(fileBuilder))
+        .addFunction(genInterceptor(fileBuilder))
+        .addFunction(genInitializer(fileBuilder))
         .build()
 
     codeGenerator.getFile(pkgName, className)
@@ -189,5 +198,45 @@ private fun RouterMeta.Module.genDefinition(fileBuilder: FileSpec.Builder): FunS
     }
     return definitionFun
         .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
+        .build()
+}
+
+/**
+ * 生成拦截器注册代码
+ */
+private fun RouterMeta.Module.genInterceptor(fileBuilder: FileSpec.Builder): FunSpec {
+    return FunSpec.builder("addInterceptor")
+        .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
+        .apply {
+            fileBuilder.addImport("com.aleyn.router", "LRouter")
+            interceptors.forEach {
+                addCode(
+                    "${LINE_START}LRouter.addInterceptor(%1L, %2L)\n",
+                    it.priority,
+                    "${it.pkgName}.${it.simpleName}()"
+                )
+            }
+        }
+        .build()
+}
+
+/**
+ * 生成初始化器集合
+ */
+private fun RouterMeta.Module.genInitializer(fileBuilder: FileSpec.Builder): FunSpec {
+
+    return FunSpec.builder("registerInitializer")
+        .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
+        .apply {
+            fileBuilder.addImport("com.aleyn.router", "LRouter")
+            initializers.forEach {
+                addCode(
+                    "${LINE_START}LRouter.registerInitializer(%1L, %2L, %3L)\n",
+                    it.priority,
+                    it.async,
+                    "${it.className}()"
+                )
+            }
+        }
         .build()
 }

@@ -5,8 +5,8 @@ plugins {
     id 'maven-publish'
 }
 
-group = lrouterGroup
-version = lrouterVersion
+group = libs.versions.lrouterGroup.get()
+version = libs.versions.lrouterVersion.get()
 project.ext.artifactId = 'core'
 
 android {
@@ -41,6 +41,10 @@ dependencies {
     implementation libs.gson
     api project(path: ':annotation')
 
+/*    registerTransform({
+
+    }, {
+    })*/
 }
 
 apply from: '../publishing.gradle'

@@ -13,21 +13,15 @@ import org.objectweb.asm.commons.InstructionAdapter
 class InitializerInstructAdapter(
     api: Int,
     methodVisitor: MethodVisitor,
-    private val initializerClass: List<HandleModel.Initializer>?
+    private val moduleClass: List<HandleModel.Module>?
 ) : InstructionAdapter(api, methodVisitor) {
 
     override fun visitCode() {
-        initializerClass?.forEach {
-            iconst(it.priority)
-            mv.visitIntInsn(Opcodes.BIPUSH, it.async)
-            mv.visitTypeInsn(Opcodes.NEW, it.className)
-            dup()
-            invokespecial(it.className, "<init>", "()V", false)
-            mv.visitTypeInsn(Opcodes.CHECKCAST, "com/aleyn/router/core/LRouterInitializer")
+        moduleClass?.forEach {
             invokestatic(
-                "com/aleyn/router/core/RouterController",
+                it.className,
                 "registerInitializer",
-                "(BZLcom/aleyn/router/core/LRouterInitializer;)V",
+                "()V",
                 false
             )
         }

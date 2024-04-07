@@ -29,11 +29,11 @@ class TestInterceptor : LRouterInterceptor {
 class RoomInterceptor2 : LRouterInterceptor {
 
     override fun intercept(navigator: Navigator): Navigator {
-        /*if (navigator.path == "/Room/Home") {
+        if (navigator.path == "/Room/Home") {
             return navigator.newBuilder()
                 .replaceUrl("/First/Home")
                 .build()
-        }*/
+        }
         Log.d("RoomInterceptor2", "intercept: 2")
         return navigator
     }

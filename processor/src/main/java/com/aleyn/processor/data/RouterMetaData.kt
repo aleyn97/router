@@ -17,13 +17,27 @@ sealed class RouterMeta {
 
     data class Module(
         val router: List<ModuleRouter>,
-        val definitions: List<Definition>
+        val definitions: List<Definition>,
+        val interceptors: List<Interceptor>,
+        val initializers: List<Initializer>,
     ) : RouterMeta()
 
     data class RouterAutowired(
         val pkgName: String,
         val simpleName: String,
         val list: List<Pair<String, KSPropertyDeclaration>>
+    ) : RouterMeta()
+
+    data class Interceptor(
+        val pkgName: String,
+        val simpleName: String,
+        val priority: Byte = 0,
+    ) : RouterMeta()
+
+    data class Initializer(
+        val priority: Byte = 0,
+        val className: String,
+        val async: Boolean,
     ) : RouterMeta()
 
 }

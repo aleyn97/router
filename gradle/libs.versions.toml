@@ -1,4 +1,9 @@
 [versions]
+####
+lrouterVersion = "1.0.6"
+lrouterGroup = "com.github.aleyn97.router"
+####
+
 appcompatVersion = "1.6.1"
 asmVersion = "9.5"
 constraintlayoutVersion = "2.1.4"
@@ -31,6 +36,8 @@ lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", v
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "symbolProcessingGradlePluginVersion" }
 symbol-processing-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "symbolProcessingGradlePluginVersion" }
+routerPluginLib = { module = "com.github.aleyn97.router:plugin", version.ref = "lrouterVersion" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -38,6 +45,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "symbolProcessingGradlePluginVersion" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlinVersion" }
+routerPlug = { id = "aleyn-router", version.ref = "lrouterVersion" }
 
 [bundles]
 

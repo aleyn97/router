@@ -1,0 +1,46 @@
+plugins {
+    id "java-gradle-plugin"
+    alias(libs.plugins.kotlin.jvm)
+}
+
+sourceSets {
+    main.java.srcDirs += "$buildDir/generated/build/com/aleyn/plugin"
+}
+
+group = libs.versions.lrouterGroup.get()
+version = libs.versions.lrouterVersion.get()
+project.ext.artifactId = "plugin"
+
+def map = new HashMap<String, String>()
+map.put('version', libs.versions.lrouterVersion.get())
+map.put('routerDepend', "${libs.versions.lrouterGroup.get()}:core:")
+map.put('processorDepend', "${libs.versions.lrouterGroup.get()}:processor:")
+
+tasks.register('genVersion', Copy) {
+    from 'src/main/build'
+    into "$buildDir/generated/build/com/aleyn/plugin"
+    expand(map)
+    filteringCharset = 'UTF-8'
+}
+
+compileKotlin.dependsOn('genVersion')
+
+dependencies {
+    implementation gradleApi()
+    compileOnly libs.gradle
+    compileOnly libs.symbol.processing.gradle.plugin
+    implementation libs.asmCore
+    implementation libs.asm.commons
+    implementation libs.gson
+}
+
+gradlePlugin {
+    plugins {
+        create("routerPlugin") {
+            id = "aleyn-router"
+            implementationClass = "com.aleyn.router.plug.RouterPlugin"
+        }
+    }
+}
+
+apply from: '../../publishing.gradle'
