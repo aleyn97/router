@@ -22,7 +22,7 @@ subprojects.forEach {
     it.afterEvaluate {
         def isAndroid = (it.plugins.hasPlugin('com.android.application')
                 || it.plugins.hasPlugin('com.android.library'))
-        def isModule = it.name.startsWith('module') || it.name.startsWith('app')
+        def isModule = it.name.startsWith('module') || it.name.startsWith('app') || it.name.startsWith('lib_base')
         if (isAndroid && isModule) {
             it.plugins.apply('aleyn-router')
         }

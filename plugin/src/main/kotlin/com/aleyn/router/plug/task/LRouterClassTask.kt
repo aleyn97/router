@@ -1,14 +1,22 @@
 package com.aleyn.router.plug.task
 
+import com.aleyn.router.plug.RouterPlugin
 import com.aleyn.router.plug.data.HandleModel
 import com.aleyn.router.plug.visitor.FindHandleClass
 import com.aleyn.router.plug.visitor.InsertCodeVisitor
+import com.android.build.gradle.internal.cxx.io.writeTextIfDifferent
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.objectweb.asm.ClassReader
@@ -29,17 +37,7 @@ import java.util.jar.JarOutputStream
 /**
  * 待插桩类
  */
-internal const val ROUTER_INJECT = "com/aleyn/router/inject/LRouterGenerateKt.class"
-
-private val blackList = arrayOf(
-    "androidx/",
-    "android/",
-    "kotlin/",
-    "kotlinx/",
-    "com/google/",
-    "org/",
-    "com/aleyn/router/"
-)
+internal const val ROUTER_GENERATE = "com/router/LRouterGenerateImpl.class"
 
 abstract class LRouterClassTask : DefaultTask() {
 
@@ -52,6 +50,9 @@ abstract class LRouterClassTask : DefaultTask() {
     @get:OutputFile
     abstract val output: RegularFileProperty
 
+    @get:Input
+    abstract val cachePath: Property<String>
+
     @TaskAction
     fun taskAction() {
 
@@ -63,7 +64,7 @@ abstract class LRouterClassTask : DefaultTask() {
 
         handleModels.clear()
 
-        allDirectories.get().forEach { directory ->
+        allDirectories.get().onEach { directory ->
             val directoryUri = directory.asFile.toURI()
             directory.asFile
                 .walk()
@@ -73,6 +74,12 @@ abstract class LRouterClassTask : DefaultTask() {
                         .relativize(file.toURI())
                         .path
                         .replace(File.separatorChar, '/')
+
+                    if (filePath == ROUTER_GENERATE) {
+                        waitInsertJar = file
+                        return@forEach
+                    }
+
                     jarOutput.putNextEntry(JarEntry(filePath))
                     file.inputStream().use { it.copyTo(jarOutput) }
                     jarOutput.closeEntry()
@@ -87,16 +94,10 @@ abstract class LRouterClassTask : DefaultTask() {
             val jarFile = JarFile(file.asFile)
             jarFile.entries().iterator().forEach { jarEntry ->
                 try {
-                    if (jarEntry.name == ROUTER_INJECT) {
-                        waitInsertJar = file.asFile
-                        return@forEach
-                    }
                     jarOutput.putNextEntry(JarEntry(jarEntry.name))
                     jarFile.getInputStream(jarEntry).use { it.copyTo(jarOutput) }
 
-                    val have = blackList.any { jarEntry.name.startsWith(it) }
-
-                    if (!have && jarEntry.name.endsWith(".class")) {
+                    if (jarEntry.name.endsWith(".class")) {
                         runCatching {
                             jarFile.getInputStream(jarEntry).findClass(handleModels)
                         }.onFailure {
@@ -110,18 +111,23 @@ abstract class LRouterClassTask : DefaultTask() {
             }
             jarFile.close()
         }
+        val cacheDir = project.layout.buildDirectory.dir(cachePath.get()).get()
+        handleModels.write(cacheDir)
 
-        if (waitInsertJar == null) throw RuntimeException("The class to insert was not found, please check for references LRouter")
-        val jarFile = JarFile(waitInsertJar!!)
-        jarOutput.putNextEntry(JarEntry(ROUTER_INJECT))
-        jarFile.getInputStream(jarFile.getJarEntry(ROUTER_INJECT)).use {
+        if (project.isApp()) {
+            if (waitInsertJar == null) throw RuntimeException("The class to insert was not found, please check for references LRouter")
+            val cachePath = cachePath.get().substringBeforeLast("/")
+            val allBuildDir = project.rootProject.subprojects
+                .filter { it.plugins.hasPlugin(RouterPlugin::class.java) }
+                .map { it.layout.buildDirectory.dir(cachePath).get() }
+
+            jarOutput.putNextEntry(JarEntry(ROUTER_GENERATE))
             val writer = ClassWriter(ClassWriter.COMPUTE_FRAMES)
-            val insertVisitor = InsertCodeVisitor(writer, handleModels)
-            ClassReader(it).accept(insertVisitor, ClassReader.SKIP_DEBUG)
+            val insertVisitor = InsertCodeVisitor(writer, allBuildDir)
+            ClassReader(waitInsertJar!!.inputStream()).accept(insertVisitor, ClassReader.SKIP_DEBUG)
             jarOutput.write(writer.toByteArray())
             jarOutput.closeEntry()
         }
-        jarFile.close()
         jarOutput.close()
     }
 
@@ -129,4 +135,37 @@ abstract class LRouterClassTask : DefaultTask() {
 
 fun InputStream.findClass(outHandle: ArrayList<HandleModel>) {
     use { ClassReader(it).accept(FindHandleClass(outHandle), 0) }
+}
+
+private fun List<HandleModel>.write(outDir: Directory) {
+    val cacheFileDir = outDir.asFile
+    if (!cacheFileDir.exists()) cacheFileDir.mkdirs()
+    this.groupBy { it::class.simpleName!! }.onEach { entry ->
+        val fileName = "${entry.key.lowercase()}.txt"
+        val file = outDir.file(fileName).asFile
+        if (!file.exists()) file.createNewFile()
+        val addBuffer = StringBuffer()
+        entry.value.forEachIndexed { index, model ->
+            when (model) {
+                is HandleModel.Autowired -> {
+                    addBuffer.append(model.className)
+                }
+
+                is HandleModel.Module -> {
+                    addBuffer.append(model.className)
+                }
+
+                is HandleModel.Initializer -> {
+                    addBuffer.append("${model.priority} ${model.async} ${model.className}")
+                }
+
+                is HandleModel.Intercept -> {
+                    addBuffer.append("${model.priority} ${model.className}")
+                }
+            }
+            if (index != entry.value.lastIndex) addBuffer.append("\n")
+        }
+        file.writeText(addBuffer.toString())
+    }
+
 }

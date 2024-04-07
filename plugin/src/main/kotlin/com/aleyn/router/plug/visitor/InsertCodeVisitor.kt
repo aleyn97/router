@@ -1,7 +1,7 @@
 package com.aleyn.router.plug.visitor
 
 import com.aleyn.router.plug.data.HandleModel
-import com.aleyn.router.plug.data.getTarget
+import org.gradle.api.file.Directory
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -12,7 +12,7 @@ import org.objectweb.asm.Opcodes
  */
 class InsertCodeVisitor(
     nextVisitor: ClassVisitor,
-    private val handleModels: List<HandleModel>,
+    private val allRouterDir: List<Directory>,
 ) : ClassVisitor(Opcodes.ASM9, nextVisitor) {
 
     override fun visitMethod(
@@ -27,29 +27,60 @@ class InsertCodeVisitor(
             "injectAutowired" -> AutowiredInstructAdapter(
                 Opcodes.ASM9,
                 mv,
-                handleModels.getTarget()
+                allRouterDir.getTarget()
             )
 
             "initModuleRouter" -> ModuleRouterInstructAdapter(
                 Opcodes.ASM9,
                 mv,
-                handleModels.getTarget()
+                allRouterDir.getTarget()
             )
 
             "registerIntercept" -> InterceptInstructAdapter(
                 Opcodes.ASM9,
                 mv,
-                handleModels.getTarget()
+                allRouterDir.getTarget()
             )
 
             "registerAllInitializer" -> InitializerInstructAdapter(
                 Opcodes.ASM9,
                 mv,
-                handleModels.getTarget()
+                allRouterDir.getTarget()
             )
 
             else -> mv
         }
     }
 
+    private inline fun <reified T : HandleModel> List<Directory>.getTarget(): List<T> {
+        val fileName = "${T::class.simpleName!!.lowercase()}.txt"
+        return asSequence()
+            .filter { it.asFile.exists() }
+            .flatMap { dir -> dir.asFileTree.matching { it.include("**/${fileName}") } }
+            .flatMap { it.readLines() }
+            .filter { it.isNotBlank() }
+            .mapNotNull {
+                when (T::class) {
+                    HandleModel.Autowired::class -> {
+                        HandleModel.Autowired(it)
+                    }
+
+                    HandleModel.Module::class -> {
+                        HandleModel.Module(it)
+                    }
+
+                    HandleModel.Intercept::class -> {
+                        val params = it.split(" ")
+                        HandleModel.Intercept(params[0].toByte(), params[1])
+                    }
+
+                    HandleModel.Initializer::class -> {
+                        val params = it.split(" ")
+                        HandleModel.Initializer(params[0].toInt(), params[1].toInt(), params[2])
+                    }
+
+                    else -> null
+                } as? T
+            }.toList()
+    }
 }

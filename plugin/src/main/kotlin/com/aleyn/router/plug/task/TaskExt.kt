@@ -9,8 +9,10 @@ import java.io.File
  * @date: 2023/8/7 11:41
  */
 
+fun Project.isApp() = plugins.hasPlugin("com.android.application")
+
 fun Project.isAndroid() =
-    plugins.hasPlugin("com.android.application") || plugins.hasPlugin("com.android.library")
+    isApp() || plugins.hasPlugin("com.android.library")
 
 
 fun Project.dependProject(): List<Project> {

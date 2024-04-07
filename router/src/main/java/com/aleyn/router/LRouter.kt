@@ -12,7 +12,6 @@ import com.aleyn.router.core.RouterUrl
 import com.aleyn.router.core.getRouterKey
 import com.aleyn.router.data.InterceptorData
 import com.aleyn.router.inject.Core
-import com.aleyn.router.inject.injectAutowired
 import com.aleyn.router.inject.qualifier.Qualifier
 import com.aleyn.router.util.ILogger
 import com.aleyn.router.util.currentLogger
@@ -130,7 +129,7 @@ object LRouter {
      */
     @JvmStatic
     fun inject(target: Any?) {
-        injectAutowired(target)
+        RouterController.routerGenerate.injectAutowired(target)
     }
 
     /**

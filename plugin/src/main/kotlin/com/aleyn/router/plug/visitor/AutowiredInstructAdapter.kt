@@ -25,7 +25,7 @@ class AutowiredInstructAdapter(
             visitTryCatchBlock(label0, label1, label2, "java/lang/Exception")
             mark(label0)
             nop()
-            load(0, OBJECT_TYPE)
+            load(1, OBJECT_TYPE)
             invokestatic(
                 it.className,
                 "autowiredInject",
@@ -36,7 +36,7 @@ class AutowiredInstructAdapter(
             val label3 = Label()
             goTo(label3)
             mark(label2)
-            store(1, OBJECT_TYPE)
+            store(2, OBJECT_TYPE)
             mark(label3)
         }
         super.visitCode()

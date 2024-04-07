@@ -7,9 +7,7 @@ import com.aleyn.router.data.InitializerData
 import com.aleyn.router.data.InterceptorData
 import com.aleyn.router.executor.DefaultPoolExecutor
 import com.aleyn.router.inject.Core
-import com.aleyn.router.inject.initModuleRouter
-import com.aleyn.router.inject.registerAllInitializer
-import com.aleyn.router.inject.registerIntercept
+import com.aleyn.router.inject.ILRouterGenerate
 import com.google.gson.Gson
 import java.util.TreeSet
 import java.util.concurrent.ExecutorService
@@ -36,6 +34,11 @@ internal object RouterController {
     internal var navCallback: NavCallback? = null
 
 
+    internal val routerGenerate: ILRouterGenerate by lazy {
+        Class.forName("com.router.LRouterGenerateImpl")
+            .newInstance() as ILRouterGenerate
+    }
+
     fun setThreadPoolExecutor(e: ExecutorService?) = e?.let {
         executor = it
     }
@@ -59,7 +62,7 @@ internal object RouterController {
 
     internal fun init(context: Context) {
         // 注册所有初始化器
-        registerAllInitializer()
+        routerGenerate.registerAllInitializer()
         // 执行各模块初始化器
         initializerModule.forEach {
             if (it.async) {
@@ -71,8 +74,8 @@ internal object RouterController {
         initializerModule.clear()
         //注册 路由 拦截器 信息
         async {
-            initModuleRouter()
-            registerIntercept()
+            routerGenerate.initModuleRouter()
+            routerGenerate.registerIntercept()
             Core.createEagerInstances()
         }
     }

@@ -22,7 +22,3 @@ sealed class HandleModel {
         val className: String
     ) : HandleModel()
 }
-
-inline fun <reified T> List<HandleModel>.getTarget(): List<T> {
-    return this.filterIsInstance<T>()
-}
