@@ -1,4 +1,5 @@
 plugins {
+    id 'kotlin'
     id "java-gradle-plugin"
     alias(libs.plugins.kotlin.jvm)
 }
@@ -25,6 +26,17 @@ tasks.register('genVersion', Copy) {
 
 compileKotlin.dependsOn('genVersion')
 
+tasks.register('copyJar', Copy) {
+    from "${buildDir}/libs/plugin-${version}.jar"
+    into "../plugins"
+    filteringCharset = 'UTF-8'
+    rename { String name ->
+        name.replace("-${version}", '')
+    }
+}
+
+jar.finalizedBy('copyJar')
+
 dependencies {
     implementation gradleApi()
     compileOnly libs.gradle
@@ -35,12 +47,17 @@ dependencies {
 }
 
 gradlePlugin {
+    website = 'https://github.com/aleyn97/router'
+    vcsUrl = 'https://github.com/aleyn97/router.git'
     plugins {
         create("routerPlugin") {
             id = "aleyn-router"
             implementationClass = "com.aleyn.router.plug.RouterPlugin"
+            displayName = "LRouter Plugin"
+            description = "LRouter code injection plugin"
+            tags.set(["android", "router"])
         }
     }
 }
 
-apply from: '../../publishing.gradle'
+apply from: '../publishing.gradle'

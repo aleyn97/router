@@ -1,8 +1,8 @@
 pluginManagement {
-    if (useLocal) includeBuild("build-logic")
     repositories {
         google()
         gradlePluginPortal()
+        mavenLocal()
         maven { url "https://maven.aliyun.com/repository/public/" }
         maven { url "https://maven.aliyun.com/repository/central/" }
         maven { url 'https://jitpack.io' }
@@ -28,3 +28,4 @@ include ':module_first'
 include ':lib_base'
 include ':module_two'
 include ':module_main'
+include ':plugin'

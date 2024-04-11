@@ -17,7 +17,7 @@ kotlinpoetVersion = "1.14.2"
 lifecycleRuntimeKtxVersion = "2.6.1"
 materialVersion = "1.9.0"
 symbolProcessingGradlePluginVersion = "1.8.20-1.0.11"
-agp = "7.4.0"
+agp = "7.4.2"
 kotlinVersion = "1.8.20"
 
 [libraries]
@@ -45,7 +45,6 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "symbolProcessingGradlePluginVersion" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlinVersion" }
-routerPlug = { id = "aleyn-router", version.ref = "lrouterVersion" }
 
 [bundles]
 

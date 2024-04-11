@@ -40,11 +40,6 @@ dependencies {
     compileOnly libs.appcompat
     implementation libs.gson
     api project(path: ':annotation')
-
-/*    registerTransform({
-
-    }, {
-    })*/
 }
 
 apply from: '../publishing.gradle'
