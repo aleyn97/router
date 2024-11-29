@@ -1,6 +1,8 @@
 package com.aleyn.router.inject
 
 import androidx.annotation.Keep
+import com.aleyn.router.LRouter
+import com.aleyn.annotation.IRouterModule
 
 /**
  * @author: Aleyn
@@ -8,13 +10,5 @@ import androidx.annotation.Keep
  */
 @Keep
 interface ILRouterGenerate {
-
-    fun injectAutowired(target: Any?)
-
     fun initModuleRouter()
-
-    fun registerIntercept()
-
-    fun registerAllInitializer()
-
 }

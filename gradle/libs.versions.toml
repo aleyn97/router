@@ -1,6 +1,6 @@
 [versions]
 ####
-lrouterVersion = "1.0.6"
+lrouterVersion = "1.0.7"
 lrouterGroup = "com.github.aleyn97.router"
 ####
 
@@ -13,7 +13,7 @@ gradleVersion = "8.0.2"
 gsonVersion = "2.9.1"
 junit = "1.1.5"
 junitVersion = "4.13.2"
-kotlinpoetVersion = "1.14.2"
+kotlinpoetVersion = "2.0.0"
 lifecycleRuntimeKtxVersion = "2.6.1"
 materialVersion = "1.9.0"
 symbolProcessingGradlePluginVersion = "1.8.20-1.0.11"

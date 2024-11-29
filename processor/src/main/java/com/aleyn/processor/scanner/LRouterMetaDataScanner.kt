@@ -4,6 +4,7 @@ import com.aleyn.annotation.Autowired
 import com.aleyn.annotation.Factory
 import com.aleyn.annotation.Initializer
 import com.aleyn.annotation.Interceptor
+import com.aleyn.annotation.LRouterModule
 import com.aleyn.annotation.Route
 import com.aleyn.annotation.Singleton
 import com.aleyn.processor.data.RouterMeta
@@ -27,6 +28,7 @@ class LRouterMetaDataScanner(
 
     private val injectClassScanner = ClassInjectScanner(logger)
 
+    private var mainModuleSymbols = mutableListOf<KSAnnotated>()
     private var validRouterSymbols = mutableListOf<KSAnnotated>()
     private var validInjectedSymbols = mutableListOf<KSAnnotated>()
     private var validAutowiredSymbols = mutableListOf<KSAnnotated>()
@@ -34,6 +36,10 @@ class LRouterMetaDataScanner(
     private var validInitializerSymbols = mutableListOf<KSAnnotated>()
 
     fun scanSymbols(resolver: Resolver): List<KSAnnotated> {
+
+        val mainRouterSymbols =
+            resolver.getSymbolsWithAnnotation(LRouterModule::class.qualifiedName!!)
+                .groupBy { it.validate() }
 
         val moduleInjectSymbols = MODULE_INJECT.flatMap { annotation ->
             resolver.getSymbolsWithAnnotation(annotation.qualifiedName!!)
@@ -52,16 +58,19 @@ class LRouterMetaDataScanner(
 
         validRouterSymbols.addAll(resolver.getSymbolsWithAnnotation(Route::class.qualifiedName!!))
 
+        mainRouterSymbols[true]?.let { mainModuleSymbols.addAll(it) }
         moduleInjectSymbols[true]?.let { validInjectedSymbols.addAll(it) }
         autowiredSymbols[true]?.let { validAutowiredSymbols.addAll(it) }
         interceptorSymbols[true]?.let { validInterceptorSymbols.addAll(it) }
         initializerSymbols[true]?.let(validInitializerSymbols::addAll)
 
+        val invalidMainModule = mainRouterSymbols[false] ?: emptyList()
         val invalidInject = moduleInjectSymbols[false] ?: emptyList()
         val invalidAutowired = autowiredSymbols[false] ?: emptyList()
         val invalidInterceptor = interceptorSymbols[false] ?: emptyList()
         val invalidInitializer = initializerSymbols[false] ?: emptyList()
-        val allInvalid = invalidInject + invalidAutowired + invalidInterceptor + invalidInitializer
+        val allInvalid =
+            invalidMainModule + invalidInject + invalidAutowired + invalidInterceptor + invalidInitializer
         if (allInvalid.isNotEmpty()) return allInvalid.onEach { logger.warn("Invalid symbols: $it") }
 
         logger.logging("All symbols are valid")
@@ -95,7 +104,12 @@ class LRouterMetaDataScanner(
             .mapNotNull { it.createInitializer() }
             .toList()
 
-        return RouterMeta.Module(router, definition, interceptors, initializers)
+        val childModule = mainModuleSymbols
+            .filterIsInstance<KSClassDeclaration>()
+            .mapNotNull { it.createChildModule(logger) }
+            .toList()
+
+        return RouterMeta.Module(router, definition, interceptors, initializers, childModule)
     }
 
 

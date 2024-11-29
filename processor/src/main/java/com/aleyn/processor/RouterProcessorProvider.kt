@@ -36,12 +36,13 @@ class RouterSymbolProcessor(
 
         logger.logging("LRouter start handle")
 
-        metaDataScanner.getAutowiredDeclaration().forEach {
+        val routerAutowired = metaDataScanner.getAutowiredDeclaration()
+        routerAutowired.forEach {
             it.generatorClass(codeGenerator, logger)
         }
 
         metaDataScanner.getModuleDeclaration()
-            .generatorModule(codeGenerator, logger, moduleName)
+            .generatorModule(codeGenerator, logger, moduleName, routerAutowired)
 
         return emptyList()
     }

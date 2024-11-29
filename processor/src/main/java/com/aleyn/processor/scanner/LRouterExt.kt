@@ -1,12 +1,16 @@
 package com.aleyn.processor.scanner
 
 import com.aleyn.annotation.Autowired
+import com.aleyn.annotation.IRouterModule
 import com.aleyn.annotation.Initializer
 import com.aleyn.annotation.Interceptor
+import com.aleyn.annotation.LRouterModule
 import com.aleyn.annotation.Route
 import com.aleyn.processor.data.RouterMeta
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSType
 
 /**
  * @author : Aleyn
@@ -87,6 +91,34 @@ fun KSClassDeclaration.createInitializer(): RouterMeta.Initializer? {
                 }
             }
             return RouterMeta.Initializer(priority, className, async)
+        }
+    }
+    return null
+}
+
+fun KSClassDeclaration.createChildModule(logger: KSPLogger): RouterMeta.ChildModule? {
+    this.annotations.forEach { annotation ->
+        if (annotation.shortName.asString() == LRouterModule::class.simpleName) {
+            val childModule = arrayListOf<String>()
+
+            val modules =
+                annotation.arguments.getArgValue<List<KSType>>(LRouterModule::modules.name)
+            modules?.onEach { module ->
+                val target = module.declaration as? KSClassDeclaration ?: return@onEach
+                val className = target.qualifiedName?.asString().orEmpty()
+                if (className.endsWith("ModuleRouter__Registered")) {
+                    val allSuper = target.superTypes.mapNotNull {
+                        it.resolve().declaration as? KSClassDeclaration
+                    }.map {
+                        it.qualifiedName?.asString().orEmpty()
+                    }
+                    if (allSuper.any { it == IRouterModule::class.qualifiedName }) {
+                        childModule.add(className)
+                    }
+                }
+            }
+            logger.warn("createChildModule :${childModule}")
+            return RouterMeta.ChildModule(childModule)
         }
     }
     return null

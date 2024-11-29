@@ -20,6 +20,7 @@ sealed class RouterMeta {
         val definitions: List<Definition>,
         val interceptors: List<Interceptor>,
         val initializers: List<Initializer>,
+        val childModule: List<ChildModule>,
     ) : RouterMeta()
 
     data class RouterAutowired(
@@ -39,6 +40,9 @@ sealed class RouterMeta {
         val className: String,
         val async: Boolean,
     ) : RouterMeta()
+
+
+    data class ChildModule(val classNames: List<String>) : RouterMeta()
 
 }
 

@@ -31,21 +31,8 @@ abstract class RouterStubClassTask : DefaultTask() {
                  */
                 @Keep
                 class LRouterGenerateImpl : ILRouterGenerate {
-
-                    @Keep
-                    override fun injectAutowired(target: Any?) {
-                    }
-
                     @Keep
                     override fun initModuleRouter() {
-                    }
-
-                    @Keep
-                    override fun registerIntercept() {
-                    }
-
-                    @Keep
-                    override fun registerAllInitializer() {
                     }
                 }
             """.trimIndent()

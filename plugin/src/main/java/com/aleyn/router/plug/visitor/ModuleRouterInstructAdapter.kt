@@ -1,7 +1,7 @@
 package com.aleyn.router.plug.visitor
 
-import com.aleyn.router.plug.data.HandleModel
 import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes.CHECKCAST
 import org.objectweb.asm.commons.InstructionAdapter
 
 
@@ -12,21 +12,23 @@ import org.objectweb.asm.commons.InstructionAdapter
 class ModuleRouterInstructAdapter(
     api: Int,
     methodVisitor: MethodVisitor,
-    private val moduleClass: List<HandleModel.Module>?
+    private val moduleClass: List<String>?
 ) : InstructionAdapter(api, methodVisitor) {
 
     override fun visitCode() {
-        moduleClass?.forEach {
-            invokestatic(
-                it.className,
-                "registerRouter",
-                "()V",
-                false
+        moduleClass?.forEach { className ->
+            getstatic(
+                className,
+                "INSTANCE",
+                "L${className};"
             )
+
+            visitTypeInsn(CHECKCAST, "com/aleyn/annotation/IRouterModule")
+
             invokestatic(
-                it.className,
-                "initDefinition",
-                "()V",
+                "com/aleyn/router/core/RouterController",
+                "registerModule",
+                "(Lcom/aleyn/annotation/IRouterModule;)V",
                 false
             )
         }

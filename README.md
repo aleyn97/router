@@ -359,6 +359,21 @@ class RoomProviderImpl2 : IRoomProvider {
 
 会输出到主工程的 `build/router` 目录下。
 
+## 远程AAR
+
+如果使用远程依赖的AAR, 使用`@LRouterModule` 把远程包的Module 类添加进去:
+
+```kotlin 
+//可在 1.0.7 版本及后续版本使用
+@LRouterModule(
+    module_first__ModuleRouter__Registered::class,
+    module_main__ModuleRouter__Registered::class,
+    module_two__ModuleRouter__Registered::class,
+)
+class RouterModule
+```
+
+
 ## 其他（选择性使用）
 
 #### 自动依赖

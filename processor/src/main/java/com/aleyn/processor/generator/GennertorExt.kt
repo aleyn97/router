@@ -1,18 +1,19 @@
 package com.aleyn.processor.generator
 
+import com.aleyn.annotation.IRouterModule
 import com.aleyn.processor.data.RouterMeta
 import com.aleyn.processor.scanner.SINGLETON
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.squareup.kotlinpoet.BYTE
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.MAP
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.jvm.jvmName
 import com.squareup.kotlinpoet.jvm.jvmStatic
 
@@ -119,14 +120,18 @@ fun RouterMeta.RouterAutowired.generatorClass(
 fun RouterMeta.Module.generatorModule(
     codeGenerator: CodeGenerator,
     logger: KSPLogger,
-    moduleName: String?
+    moduleName: String?,
+    routerAutowired: List<RouterMeta.RouterAutowired>
 ) {
     logger.logging("start generator${moduleName}Module")
+    logger.warn("childModule:${childModule}")
     val pkgName = "com.module.router"
     if (this.router.isEmpty()
         && this.definitions.isEmpty()
         && this.interceptors.isEmpty()
         && this.initializers.isEmpty()
+        && routerAutowired.isEmpty()
+        && this.childModule.isEmpty()
     ) return
 
     val className = moduleName.orEmpty() + MODULE_ROUTER_CLASS_SUFFIX
@@ -135,9 +140,10 @@ fun RouterMeta.Module.generatorModule(
         .jvmName(className)
         .addImport("com.aleyn.router", "LRouter")
         .addImport("com.aleyn.router.core", "RouteMeta")
+        .addImport("com.aleyn.annotation", "IRouterModule")
 
     val routerFunSpec = FunSpec.builder("registerRouter")
-        .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
+        .addModifiers(KModifier.OVERRIDE)
 
     router.forEach {
         routerFunSpec.addCode(
@@ -149,11 +155,19 @@ fun RouterMeta.Module.generatorModule(
         )
     }
 
-    val fileSpec = fileBuilder
+    val classType = TypeSpec.objectBuilder(className)
+        .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
+        .addSuperinterface(ClassName.bestGuess("com.aleyn.annotation.IRouterModule"))
         .addFunction(routerFunSpec.build())
         .addFunction(genDefinition(fileBuilder))
         .addFunction(genInterceptor(fileBuilder))
         .addFunction(genInitializer(fileBuilder))
+        .addFunction(routerAutowired.genRouterAutowired(fileBuilder))
+        .addFunction(genChildModules(fileBuilder))
+        .build()
+
+    val fileSpec = fileBuilder
+        .addType(classType)
         .build()
 
     codeGenerator.getFile(pkgName, className)
@@ -166,6 +180,8 @@ fun RouterMeta.Module.generatorModule(
  */
 private fun RouterMeta.Module.genDefinition(fileBuilder: FileSpec.Builder): FunSpec {
     val definitionFun = FunSpec.builder("initDefinition")
+        .addModifiers(KModifier.OVERRIDE)
+
     if (this.definitions.isNotEmpty()) {
         this.definitions.forEach {
             val paramGet = generateConstructor(it.parameters)
@@ -206,7 +222,7 @@ private fun RouterMeta.Module.genDefinition(fileBuilder: FileSpec.Builder): FunS
  */
 private fun RouterMeta.Module.genInterceptor(fileBuilder: FileSpec.Builder): FunSpec {
     return FunSpec.builder("addInterceptor")
-        .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
+        .addModifiers(KModifier.OVERRIDE)
         .apply {
             fileBuilder.addImport("com.aleyn.router", "LRouter")
             interceptors.forEach {
@@ -226,7 +242,7 @@ private fun RouterMeta.Module.genInterceptor(fileBuilder: FileSpec.Builder): Fun
 private fun RouterMeta.Module.genInitializer(fileBuilder: FileSpec.Builder): FunSpec {
 
     return FunSpec.builder("registerInitializer")
-        .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
+        .addModifiers(KModifier.OVERRIDE)
         .apply {
             fileBuilder.addImport("com.aleyn.router", "LRouter")
             initializers.forEach {
@@ -237,6 +253,58 @@ private fun RouterMeta.Module.genInitializer(fileBuilder: FileSpec.Builder): Fun
                     "${it.className}()"
                 )
             }
+        }
+        .build()
+}
+
+/**
+ * 页面参数生成
+ */
+private fun List<RouterMeta.RouterAutowired>.genRouterAutowired(fileBuilder: FileSpec.Builder): FunSpec {
+
+    val params = ParameterSpec.builder("target", Any::class.asTypeName().copy(true))
+        .build()
+
+    return FunSpec.builder("injectAutowired")
+        .addModifiers(KModifier.OVERRIDE)
+        .addParameter(params)
+        .apply {
+            fileBuilder.addImport("com.aleyn.router", "LRouter")
+            addCode("target ?: return\n")
+            this@genRouterAutowired.forEach {
+                val pkgName = it.pkgName
+                val simpleName = it.simpleName
+
+                val className = simpleName + AUTOWIRED_SUFFIX
+                fileBuilder.addImport(pkgName, className)
+                addCode(
+                    """
+                        try {
+                         `${className}`.autowiredInject(target)
+                        } catch(e:Exception){}
+                        
+                    """.trimIndent()
+                )
+            }
+        }
+        .build()
+}
+
+
+/**
+ * 生成初始化器集合
+ */
+private fun RouterMeta.Module.genChildModules(fileBuilder: FileSpec.Builder): FunSpec {
+    return FunSpec.builder("childModule")
+        .addModifiers(KModifier.OVERRIDE)
+        .returns(List::class.parameterizedBy(IRouterModule::class))
+        .apply {
+            fileBuilder.addImport("com.aleyn.router", "LRouter")
+            addCode("val list = arrayListOf<IRouterModule>()\n")
+            childModule.flatMap { it.classNames }.forEach { className ->
+                addCode("list.add(${className})\n")
+            }
+            addCode("return list")
         }
         .build()
 }

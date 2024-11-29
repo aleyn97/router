@@ -1,10 +1,6 @@
 package com.aleyn.router.plug.visitor
 
-import com.aleyn.router.plug.data.HandleModel
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes.BIPUSH
-import org.objectweb.asm.Opcodes.CHECKCAST
-import org.objectweb.asm.Opcodes.NEW
 import org.objectweb.asm.commons.InstructionAdapter
 
 
@@ -15,13 +11,13 @@ import org.objectweb.asm.commons.InstructionAdapter
 class InterceptInstructAdapter(
     api: Int,
     methodVisitor: MethodVisitor,
-    private val moduleClass: List<HandleModel.Module>?
+    private val moduleClass: List<String>?
 ) : InstructionAdapter(api, methodVisitor) {
 
     override fun visitCode() {
-        moduleClass?.forEach {
+        moduleClass?.forEach { className ->
             invokestatic(
-                it.className,
+                className,
                 "addInterceptor",
                 "()V",
                 false
