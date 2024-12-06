@@ -93,12 +93,17 @@ internal fun generateConstructor(constructorParameters: List<ConstructorParamete
 }
 
 
-internal fun CodeGenerator.getFile(packageName: String, fileName: String): OutputStream {
+internal fun CodeGenerator.getFile(
+    packageName: String,
+    fileName: String,
+    extensionName: String = "kt"
+): OutputStream {
     return try {
         createNewFile(
             Dependencies.ALL_FILES,
             packageName,
-            fileName
+            fileName,
+            extensionName
         )
     } catch (ex: FileAlreadyExistsException) {
         ex.file.outputStream()

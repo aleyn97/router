@@ -88,6 +88,33 @@ plugins {
 
 以上配置完成就能正常使用了，**插件会自动添加依赖**。
 
+## 初始化模式
+
+提供两种模式
+
+- ServiceLoader : 默认使用 ServiceLoader 这种方式对编译速度无影响，缺点是 ServiceLoader
+  内部使用了反射 (这点影响其实可以忽略)
+- AMS: 通过字节码插桩，无反射。缺点是无法增量编译，对开发过程中不够友好，建议只在 打 release 包时候开启
+
+使用方式：
+
+```groovy
+ buildTypes {
+    release {
+        minifyEnabled false
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        routerConfig { openASM = true }// release 选择性开启使用
+    }
+
+    debug {
+        minifyEnabled false
+        //routerConfig { openASM = false } // debug 关闭字节码插桩。默认也是关闭的
+    }
+}
+
+
+```
+
 ## 基本使用
 
 #### 路由
@@ -359,12 +386,12 @@ class RoomProviderImpl2 : IRoomProvider {
 
 会输出到主工程的 `build/router` 目录下。
 
-## 远程AAR
+## 添加子Module
 
-如果使用远程依赖的AAR, 使用`@LRouterModule` 把远程包的Module 类添加进去:
+使用`@LRouterModule` 可以添加子Module 类:
 
 ```kotlin 
-//可在 1.0.7 版本及后续版本使用
+//可在 1.0.7 版本使用
 @LRouterModule(
     module_first__ModuleRouter__Registered::class,
     module_main__ModuleRouter__Registered::class,
@@ -372,7 +399,6 @@ class RoomProviderImpl2 : IRoomProvider {
 )
 class RouterModule
 ```
-
 
 ## 其他（选择性使用）
 

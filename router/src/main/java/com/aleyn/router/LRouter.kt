@@ -142,7 +142,7 @@ object LRouter {
      */
     @JvmStatic
     fun inject(target: Any?) {
-        RouterController.allModules.forEach {
+        RouterController.modules.forEach {
             it.injectAutowired(target)
         }
     }

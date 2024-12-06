@@ -1,6 +1,7 @@
 package com.aleyn.router.plug.task
 
 import com.aleyn.router.plug.visitor.InsertCodeVisitor
+import com.aleyn.router.plug.visitor.MODULE_ROUTER_CLASS_SUFFIX
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
@@ -26,7 +27,22 @@ abstract class LRouterAsmClassVisitor : AsmClassVisitorFactory<ParametersImpl> {
         if (classContext.currentClassData.className == GENERATE_INJECT) {
             val inputFiles = parameters.get().inputFiles.get()
             val genDirName = parameters.get().genDirName.get()
-            return InsertCodeVisitor(nextClassVisitor, inputFiles, genDirName)
+
+            val allModels = inputFiles.asSequence()
+                .flatMap { dir -> dir.asFileTree.matching { it.include("**/**.kt") } }
+                .mapNotNull {
+                    val className = it.absolutePath
+                        .replace("\\", "/")
+                        .substringAfter(genDirName)
+                        .substringAfter("kotlin/")
+                        .removeSuffix(".kt")
+
+                    if (className.endsWith(MODULE_ROUTER_CLASS_SUFFIX)) {
+                        return@mapNotNull className
+                    }
+                    return@mapNotNull null
+                }.toList()
+            return InsertCodeVisitor(nextClassVisitor, allModels)
         }
         return nextClassVisitor
     }

@@ -45,7 +45,7 @@ abstract class GenLRouterDocTask : DefaultTask() {
 
     private fun readRouterInfo(file: File): List<RouterTable> {
         val tables = ArrayList<RouterTable>()
-        val start = "public fun registerRouter() {"
+        val start = "override fun registerRouter() {"
         var collect = false
         val lines = file.readLines()
 
@@ -57,7 +57,7 @@ abstract class GenLRouterDocTask : DefaultTask() {
                 return@forEach
             }
             if (!collect) return@forEach
-            if (line == "}") return tables
+            if (line.contains("}")) return tables
             temp += line.trim()
             if (!temp.endsWith(")")) return@forEach
             val first = temp.indexOfFirst { it == '(' } + 1

@@ -12,6 +12,7 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.jvm.jvmName
@@ -124,7 +125,6 @@ fun RouterMeta.Module.generatorModule(
     routerAutowired: List<RouterMeta.RouterAutowired>
 ) {
     logger.logging("start generator${moduleName}Module")
-    logger.warn("childModule:${childModule}")
     val pkgName = "com.module.router"
     if (this.router.isEmpty()
         && this.definitions.isEmpty()
@@ -155,9 +155,18 @@ fun RouterMeta.Module.generatorModule(
         )
     }
 
-    val classType = TypeSpec.objectBuilder(className)
+    val instanceProperty = PropertySpec.builder("INSTANCE", ClassName(pkgName, className))
+        .jvmStatic()
+        .initializer("$pkgName.$className()")
+        .build()
+    val companion = TypeSpec.companionObjectBuilder()
+        .addProperty(instanceProperty)
+        .build()
+
+    val classType = TypeSpec.classBuilder(className)
         .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
         .addSuperinterface(ClassName.bestGuess("com.aleyn.annotation.IRouterModule"))
+        .addType(companion)
         .addFunction(routerFunSpec.build())
         .addFunction(genDefinition(fileBuilder))
         .addFunction(genInterceptor(fileBuilder))
@@ -173,6 +182,15 @@ fun RouterMeta.Module.generatorModule(
     codeGenerator.getFile(pkgName, className)
         .bufferedWriter()
         .use { fileSpec.writeTo(it) }
+
+    codeGenerator.getFile(
+        "META-INF/services",
+        "com.aleyn.annotation.IRouterModule",
+        ""
+    ).use {
+        val name = "$pkgName.$className"
+        it.write(name.toByteArray())
+    }
 }
 
 /**
@@ -302,7 +320,7 @@ private fun RouterMeta.Module.genChildModules(fileBuilder: FileSpec.Builder): Fu
             fileBuilder.addImport("com.aleyn.router", "LRouter")
             addCode("val list = arrayListOf<IRouterModule>()\n")
             childModule.flatMap { it.classNames }.forEach { className ->
-                addCode("list.add(${className})\n")
+                addCode("list.add(${className}.INSTANCE)\n")
             }
             addCode("return list")
         }

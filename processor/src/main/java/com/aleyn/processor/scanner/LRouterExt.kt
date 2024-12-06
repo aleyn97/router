@@ -96,7 +96,7 @@ fun KSClassDeclaration.createInitializer(): RouterMeta.Initializer? {
     return null
 }
 
-fun KSClassDeclaration.createChildModule(logger: KSPLogger): RouterMeta.ChildModule? {
+fun KSClassDeclaration.createChildModule(): RouterMeta.ChildModule? {
     this.annotations.forEach { annotation ->
         if (annotation.shortName.asString() == LRouterModule::class.simpleName) {
             val childModule = arrayListOf<String>()
@@ -117,7 +117,6 @@ fun KSClassDeclaration.createChildModule(logger: KSPLogger): RouterMeta.ChildMod
                     }
                 }
             }
-            logger.warn("createChildModule :${childModule}")
             return RouterMeta.ChildModule(childModule)
         }
     }

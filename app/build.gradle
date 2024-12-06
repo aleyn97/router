@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
+    id 'aleyn-router'
 }
 
 android {
@@ -22,8 +23,15 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            routerConfig { openASM = true }
+        }
+
+        debug {
+            minifyEnabled false
+            routerConfig { openASM = false }
         }
     }
+
     kotlin {
         jvmToolchain(11)
     }

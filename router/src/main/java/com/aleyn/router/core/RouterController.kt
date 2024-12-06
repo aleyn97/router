@@ -4,14 +4,15 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.aleyn.annotation.IRouterModule
-import com.aleyn.router.LRouter
 import com.aleyn.router.data.InitializerData
 import com.aleyn.router.data.InterceptorData
 import com.aleyn.router.executor.DefaultPoolExecutor
 import com.aleyn.router.inject.Core
-import com.aleyn.router.inject.ILRouterGenerate
+import com.aleyn.router.inject.initModuleRouter
 import com.aleyn.router.util.dLog
+import com.aleyn.router.util.iLog
 import com.google.gson.Gson
+import java.util.ServiceLoader
 import java.util.TreeSet
 import java.util.concurrent.ExecutorService
 
@@ -28,7 +29,8 @@ internal object RouterController {
 
     private val main = Handler(Looper.getMainLooper())
 
-    internal val allModules = HashSet<IRouterModule>()
+    private val allModules = HashMap<String, IRouterModule>()
+    internal val modules get() = allModules.values
 
     internal val ROUTER_MAP = LRouterMap()
 
@@ -38,11 +40,10 @@ internal object RouterController {
 
     internal var navCallback: NavCallback? = null
 
-
-    internal val routerGenerate: ILRouterGenerate by lazy {
-        Class.forName("com.router.LRouterGenerateImpl")
-            .newInstance() as ILRouterGenerate
-    }
+    /**
+     * 自动注入
+     */
+    private var autoInject = false
 
     fun setThreadPoolExecutor(e: ExecutorService?) = e?.let {
         executor = it
@@ -66,14 +67,32 @@ internal object RouterController {
 
 
     internal fun init(context: Context) {
-        routerGenerate.initModuleRouter()
+        initModuleRouter()
+        if (autoInject) {
+            "LRouter use ASM init".iLog()
+        } else {
+            val serviceLoader = ServiceLoader.load(IRouterModule::class.java)
+            val iterator = serviceLoader.iterator()
+            val startTime = System.currentTimeMillis()
+            try {
+                while (iterator.hasNext()) {
+                    val module = iterator.next()
+                    registerModule(module)
+                }
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+            val endTime = System.currentTimeMillis()
+            "LRouter use ServiceLoader init -----> time: ${endTime - startTime}ms".iLog()
+        }
+
         // 注册子Module
         registerChildModule()
         //初始化依赖注入，由于初始化器可能会用到 注入类，所以放在最前
-        allModules.forEach { it.initDefinition() }
+        modules.forEach { it.initDefinition() }
         Core.createEagerInstances()
         // 注册所有初始化器
-        allModules.forEach { it.registerInitializer() }
+        modules.forEach { it.registerInitializer() }
         // 执行各模块初始化器
         initializerModule.forEach {
             if (it.async) {
@@ -85,7 +104,7 @@ internal object RouterController {
         initializerModule.clear()
         //注册 路由 拦截器
         async {
-            allModules.forEach {
+            modules.forEach {
                 it.registerRouter()
                 it.addInterceptor()
             }
@@ -96,7 +115,7 @@ internal object RouterController {
      * 子Module
      */
     private fun registerChildModule() {
-        allModules.flatMap { it.childModule() }.forEach(::registerModule)
+        modules.flatMap { it.childModule() }.forEach(::registerModule)
     }
 
     /**
@@ -104,8 +123,10 @@ internal object RouterController {
      */
     @JvmStatic
     fun registerModule(module: IRouterModule) {
-        "registerModule : ${module::class.qualifiedName}".dLog()
-        allModules.add(module)
+        module::class.qualifiedName?.let {
+            "registerModule : $it".dLog()
+            allModules[it] = module
+        }
     }
 
     /**
@@ -118,6 +139,15 @@ internal object RouterController {
         initializer: LRouterInitializer
     ) {
         initializerModule.add(InitializerData(priority, async, initializer))
+    }
+
+
+    /**
+     * 注册初始化器
+     */
+    @JvmStatic
+    fun autoInject() {
+        autoInject = true
     }
 
 }

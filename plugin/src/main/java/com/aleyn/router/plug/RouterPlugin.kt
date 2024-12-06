@@ -1,13 +1,18 @@
 package com.aleyn.router.plug
 
-import com.aleyn.plugin.*
+import com.aleyn.plugin.ROUTER_CORE
+import com.aleyn.plugin.ROUTER_PROCESSOR
+import com.aleyn.plugin.ROUTER_VERSION
+import com.aleyn.router.plug.entension.BuildTypeDslExtension
+import com.aleyn.router.plug.entension.VariantRouterDslExtension
 import com.aleyn.router.plug.task.GenLRouterDocTask
-import com.aleyn.router.plug.task.LRouterAsmClassVisitor
-import com.aleyn.router.plug.task.RouterStubClassTask
+import com.aleyn.router.plug.task.LRouterClassTask
 import com.android.build.api.AndroidPluginVersion
-import com.android.build.api.instrumentation.FramesComputationMode
-import com.android.build.api.instrumentation.InstrumentationScope
+import com.android.build.api.artifact.ScopedArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.DslExtension
+import com.android.build.api.variant.ScopedArtifacts
+import com.android.build.api.variant.VariantExtensionConfig
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.DynamicFeaturePlugin
 import com.android.build.gradle.LibraryPlugin
@@ -56,33 +61,65 @@ class RouterPlugin : Plugin<Project> {
             "AGP version must be at least 7.4 or higher. current version ${androidComponents.pluginVersion}"
         }
 
+        androidComponents.registerExtension(
+            DslExtension.Builder("routerConfig")
+                .extendBuildTypeWith(BuildTypeDslExtension::class.java)
+                .build()
+        ) { config: VariantExtensionConfig<*> ->
+            project.objects.newInstance(
+                VariantRouterDslExtension::class.java,
+                config
+            )
+        }
 
         androidComponents.onVariants { variant ->
-            val addSourceTaskProvider = project.tasks.register(
-                "${variant.name}RouterStubClass",
-                RouterStubClassTask::class.java
-            )
-            variant.sources.java?.addGeneratedSourceDirectory(
-                addSourceTaskProvider,
-                RouterStubClassTask::outputFolder
-            )
+            val extension = variant.getExtension(VariantRouterDslExtension::class.java)
 
-            val generatedDir = "generated/ksp/"
-            variant.instrumentation.transformClassesWith(
-                LRouterAsmClassVisitor::class.java,
-                InstrumentationScope.PROJECT
-            ) { param ->
-                param.genDirName.set(generatedDir)
-                val list = project.rootProject.subprojects.plus(project)
-                    .map { it.layout.buildDirectory.dir(generatedDir).get() }
-                param.inputFiles.set(list)
+            val isOpenASM = extension?.variantOpenASM?.get() ?: false
+            println("${variant.name} OpenASM:${isOpenASM}")
+
+            if (isOpenASM) {
+                val taskProvider = project.tasks.register(
+                    "${variant.name}LRouterHandleClasses",
+                    LRouterClassTask::class.java
+                )
+
+                variant.artifacts
+                    .forScope(ScopedArtifacts.Scope.ALL)
+                    .use(taskProvider)
+                    .toTransform(
+                        ScopedArtifact.CLASSES,
+                        LRouterClassTask::allJars,
+                        LRouterClassTask::allDirectories,
+                        LRouterClassTask::output
+                    )
             }
-            variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
-            variant.instrumentation.excludes.addAll(
-                "androidx/**",
-                "android/**",
-                "com/google/**",
-            )
+
+
+//            val addSourceTaskProvider = project.tasks.register(
+//                "${variant.name}RouterStubClass",
+//                RouterStubClassTask::class.java
+//            )
+//            variant.sources.java?.addGeneratedSourceDirectory(
+//                addSourceTaskProvider,
+//                RouterStubClassTask::outputFolder
+//            )
+//            val generatedDir = "generated/ksp/"
+//            variant.instrumentation.transformClassesWith(
+//                LRouterAsmClassVisitor::class.java,
+//                InstrumentationScope.PROJECT
+//            ) { param ->
+//                param.genDirName.set(generatedDir)
+//                val list = project.rootProject.subprojects.plus(project)
+//                    .map { it.layout.buildDirectory.dir(generatedDir).get() }
+//                param.inputFiles.set(list)
+//            }
+//            variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
+//            variant.instrumentation.excludes.addAll(
+//                "androidx/**",
+//                "android/**",
+//                "com/google/**",
+//            )
 
         }
         project.tasks.register("generateLRouterDoc", GenLRouterDocTask::class.java)

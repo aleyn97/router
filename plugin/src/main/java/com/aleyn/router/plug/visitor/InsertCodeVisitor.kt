@@ -1,6 +1,5 @@
 package com.aleyn.router.plug.visitor
 
-import org.gradle.api.file.Directory
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -18,26 +17,8 @@ internal const val MODULE_ROUTER_CLASS_SUFFIX = "__ModuleRouter__Registered"
 
 class InsertCodeVisitor(
     nextVisitor: ClassVisitor,
-    private val allRouterDir: List<Directory>,
-    private val genDirName: String
+    private val allModuleClass: List<String>
 ) : ClassVisitor(Opcodes.ASM9, nextVisitor) {
-
-    private val allModels: List<String> by lazy {
-        allRouterDir.asSequence()
-            .flatMap { dir -> dir.asFileTree.matching { it.include("**/**.kt") } }
-            .mapNotNull {
-                val className = it.absolutePath
-                    .replace("\\", "/")
-                    .substringAfter(genDirName)
-                    .substringAfter("kotlin/")
-                    .removeSuffix(".kt")
-
-                if (className.endsWith(MODULE_ROUTER_CLASS_SUFFIX)) {
-                    return@mapNotNull className
-                }
-                return@mapNotNull null
-            }.toList()
-    }
 
     override fun visitMethod(
         access: Int,
@@ -51,7 +32,7 @@ class InsertCodeVisitor(
             "initModuleRouter" -> ModuleRouterInstructAdapter(
                 Opcodes.ASM9,
                 mv,
-                allModels
+                allModuleClass
             )
 
             else -> mv

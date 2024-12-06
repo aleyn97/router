@@ -16,13 +16,19 @@ class ModuleRouterInstructAdapter(
 ) : InstructionAdapter(api, methodVisitor) {
 
     override fun visitCode() {
+        invokestatic(
+            "com/aleyn/router/core/RouterController",
+            "autoInject",
+            "()V",
+            false
+        )
         moduleClass?.forEach { className ->
-            getstatic(
+            invokestatic(
                 className,
-                "INSTANCE",
-                "L${className};"
+                "getINSTANCE",
+                "()L${className};",
+                false
             )
-
             visitTypeInsn(CHECKCAST, "com/aleyn/annotation/IRouterModule")
 
             invokestatic(

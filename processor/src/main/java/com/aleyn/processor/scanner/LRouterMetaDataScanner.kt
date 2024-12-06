@@ -106,7 +106,7 @@ class LRouterMetaDataScanner(
 
         val childModule = mainModuleSymbols
             .filterIsInstance<KSClassDeclaration>()
-            .mapNotNull { it.createChildModule(logger) }
+            .mapNotNull { it.createChildModule() }
             .toList()
 
         return RouterMeta.Module(router, definition, interceptors, initializers, childModule)
