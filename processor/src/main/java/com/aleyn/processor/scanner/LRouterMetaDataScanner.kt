@@ -36,6 +36,12 @@ class LRouterMetaDataScanner(
     private var validInitializerSymbols = mutableListOf<KSAnnotated>()
 
     fun scanSymbols(resolver: Resolver): List<KSAnnotated> {
+        mainModuleSymbols.clear()
+        validRouterSymbols.clear()
+        validInjectedSymbols.clear()
+        validAutowiredSymbols.clear()
+        validInterceptorSymbols.clear()
+        validInitializerSymbols.clear()
 
         val mainRouterSymbols =
             resolver.getSymbolsWithAnnotation(LRouterModule::class.qualifiedName!!)

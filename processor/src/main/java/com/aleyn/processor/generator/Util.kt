@@ -5,16 +5,14 @@ import com.aleyn.processor.data.DependencyKind
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSTypeArgument
-import com.google.gson.GsonBuilder
 import java.io.OutputStream
 
 /**
  * @author: Aleyn
  * @date: 2023/7/24 16:15
  */
-internal val gson = GsonBuilder().create()
 
 internal fun String.isPrimitiveAndString(): Boolean {
     return when (this.lowercase()) {
@@ -62,10 +60,6 @@ internal fun List<KSTypeArgument>.getTypeStr(): String {
     return typeArg
 }
 
-internal fun KSPropertyDeclaration.getAllTypeStr(): String {
-    return type.toString() + type.element?.typeArguments?.getTypeStr().orEmpty()
-}
-
 /**
  * 生成参数注入字符串
  */
@@ -92,18 +86,33 @@ internal fun generateConstructor(constructorParameters: List<ConstructorParamete
     }
 }
 
-
-internal fun CodeGenerator.getFile(
+internal fun CodeGenerator.genKtFile(
     packageName: String,
     fileName: String,
-    extensionName: String = "kt"
+    vararg sources: KSFile
 ): OutputStream {
     return try {
         createNewFile(
-            Dependencies.ALL_FILES,
+            Dependencies(aggregating = false, sources = sources),
             packageName,
             fileName,
-            extensionName
+        )
+    } catch (ex: FileAlreadyExistsException) {
+        ex.file.outputStream()
+    }
+}
+
+internal fun CodeGenerator.genResFile(
+    packageName: String,
+    fileName: String,
+    vararg sources: KSFile
+): OutputStream {
+    return try {
+        createNewFile(
+            Dependencies(aggregating = false, sources = sources),
+            packageName,
+            fileName,
+            ""
         )
     } catch (ex: FileAlreadyExistsException) {
         ex.file.outputStream()

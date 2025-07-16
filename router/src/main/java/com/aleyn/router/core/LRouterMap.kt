@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class LRouterMap : ConcurrentHashMap<String, RouteMeta?>() {
 
-    override fun put(key: String, value: RouteMeta): RouteMeta? {
+    override fun put(key: String, value: RouteMeta?): RouteMeta? {
         if (containsKey(key)) {
             "LRouter: A Key cannot correspond to multiple pages, which will overwrite the existing pages".wLog()
         }

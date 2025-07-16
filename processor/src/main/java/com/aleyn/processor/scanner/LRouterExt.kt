@@ -7,7 +7,7 @@ import com.aleyn.annotation.Interceptor
 import com.aleyn.annotation.LRouterModule
 import com.aleyn.annotation.Route
 import com.aleyn.processor.data.RouterMeta
-import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.containingFile
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -51,6 +51,7 @@ fun KSClassDeclaration.createModuleRouter(): RouterMeta.ModuleRouter? {
                     Route::other.name -> router.other = it.value as Int
                 }
             }
+            router.targetFile = annotation.containingFile
             return router
         }
     }
@@ -71,7 +72,7 @@ fun KSClassDeclaration.createInterceptor(): RouterMeta.Interceptor? {
                     }
                 }
             }
-            return RouterMeta.Interceptor(pkgName, className, priority)
+            return RouterMeta.Interceptor(pkgName, className, priority, annotation.containingFile)
         }
     }
     return null
@@ -90,7 +91,7 @@ fun KSClassDeclaration.createInitializer(): RouterMeta.Initializer? {
                     Initializer::async.name -> async = (it.value as? Boolean) ?: false
                 }
             }
-            return RouterMeta.Initializer(priority, className, async)
+            return RouterMeta.Initializer(priority, className, async, annotation.containingFile)
         }
     }
     return null

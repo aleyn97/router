@@ -4,6 +4,7 @@ import com.aleyn.annotation.Factory
 import com.aleyn.annotation.Singleton
 import com.aleyn.processor.data.Definition
 import com.aleyn.processor.data.DefinitionAnnotation
+import com.google.devtools.ksp.containingFile
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
@@ -86,6 +87,7 @@ class ClassInjectScanner(private val logger: KSPLogger) {
             className,
             constructorParams ?: emptyList(),
             currentBind,
+            annotation.containingFile
         )
     }
 }

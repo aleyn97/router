@@ -44,7 +44,7 @@ fun RouterMeta.RouterAutowired.generatorClass(
     val list = routerAutowired.list
 
     val parentDeclaration =
-        routerAutowired.list.firstOrNull()?.second?.parent as? KSClassDeclaration
+        list.firstOrNull()?.second?.parent as? KSClassDeclaration
 
     val className = simpleName + AUTOWIRED_SUFFIX
 
@@ -56,10 +56,10 @@ fun RouterMeta.RouterAutowired.generatorClass(
     val classSpec = TypeSpec.objectBuilder(className)
         .addAnnotation(ClassName.bestGuess("androidx.annotation.Keep"))
 
-    val typeParams = if (parentDeclaration?.typeParameters.isNullOrEmpty()) "" else
-        parentDeclaration!!.typeParameters.joinToString(", ", "<", ">") {
-            "*"
-        }
+    val typeParameters = parentDeclaration?.typeParameters
+    val typeParams = if (typeParameters.isNullOrEmpty()) "" else {
+        typeParameters.joinToString(", ", "<", ">") { "*" }
+    }
 
     val funSpec = FunSpec.builder(FUN_INJECT_NAME)
         .jvmStatic()
@@ -71,25 +71,28 @@ fun RouterMeta.RouterAutowired.generatorClass(
 
         val paramKey = item.first
         val fieldName = declaration.simpleName.asString()
-        val type = declaration.type.toString()
+
+        val type = declaration.type
 
         val paramType = declaration.type.resolve()
+        val typeName = paramType.declaration.simpleName.asString()
+
         val typeDeclaration = paramType.declaration as KSClassDeclaration
 
-        if (!type.isPrimitiveAndString()) {
+        if (!typeName.isPrimitiveAndString()) {
             val typePkgName = paramType.declaration.packageName.asString()
-            fileBuilder.addImport(typePkgName, type)
+            fileBuilder.addImport(typePkgName, typeName)
         }
 
-        val typeAllName = declaration.getAllTypeStr()
+        val typeAllName = typeDeclaration.simpleName.asString() +
+                type.element?.typeArguments?.getTypeStr().orEmpty()
 
         if (typeDeclaration.isParcelable()) {
             val key = paramKey.ifBlank { fieldName }
             funSpec.addCode(
-                "\nDefaultParamParser.parseDefault<%1L>(target, \"%2L\", %3L)\n?.let{ target.%4L = it }\n",
-                typeAllName,
+                "\nDefaultParamParser.parseDefault(target, \"%1L\", %2L)\n?.let{ target.%3L = it }\n",
                 key,
-                "$type::class.java",
+                "$typeName::class.java",
                 fieldName
             )
         } else {
@@ -109,7 +112,8 @@ fun RouterMeta.RouterAutowired.generatorClass(
 
     val fileSpec = fileBuilder.addType(classSpec.build()).build()
 
-    codeGenerator.getFile(pkgName, className)
+    val sources = list.mapNotNull { it.second.containingFile }.toTypedArray()
+    codeGenerator.genKtFile(pkgName, className, sources = sources)
         .bufferedWriter()
         .use { fileSpec.writeTo(it) }
 }
@@ -135,6 +139,13 @@ fun RouterMeta.Module.generatorModule(
     ) return
 
     val className = moduleName.orEmpty() + MODULE_ROUTER_CLASS_SUFFIX
+
+
+    val allFile = (this.router.mapNotNull { it.targetFile } +
+            definitions.mapNotNull { it.targetFile } +
+            interceptors.mapNotNull { it.targetFile } +
+            initializers.mapNotNull { it.targetFile } +
+            routerAutowired.flatMap { it.list }.mapNotNull { it.second.containingFile }).toSet()
 
     val fileBuilder = FileSpec.builder(pkgName, className)
         .jvmName(className)
@@ -179,14 +190,14 @@ fun RouterMeta.Module.generatorModule(
         .addType(classType)
         .build()
 
-    codeGenerator.getFile(pkgName, className)
+    codeGenerator.genKtFile(pkgName, className, *allFile.toTypedArray())
         .bufferedWriter()
         .use { fileSpec.writeTo(it) }
 
-    codeGenerator.getFile(
+    codeGenerator.genResFile(
         "META-INF/services",
         "com.aleyn.annotation.IRouterModule",
-        ""
+        *allFile.toTypedArray()
     ).use {
         val name = "$pkgName.$className"
         it.write(name.toByteArray())

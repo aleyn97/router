@@ -6,3 +6,7 @@
 deploymentTargetSelector.xml
 other.xml
 modules.xml
+AndroidProjectSystem.xml
+appInsightsSettings.xml
+runConfigurations.xml
+caches

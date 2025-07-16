@@ -1,6 +1,7 @@
 package com.aleyn.processor.data
 
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSFile
 import kotlin.reflect.KClass
 
 /**
@@ -22,7 +23,8 @@ sealed class Definition(
     val qualifier: String? = null,
     val lazy: Boolean? = null,
     val keyword: DefinitionAnnotation,
-    val binding: KSDeclaration?
+    val binding: KSDeclaration?,
+    var targetFile: KSFile? = null,
 ) {
 
     fun isType(keyword: DefinitionAnnotation): Boolean = this.keyword == keyword
@@ -62,7 +64,8 @@ sealed class Definition(
         keyword: DefinitionAnnotation,
         className: String,
         constructorParameters: List<ConstructorParameter> = emptyList(),
-        binding: KSDeclaration?
+        binding: KSDeclaration?,
+        targetFile: KSFile? = null,
     ) : Definition(
         className,
         constructorParameters,
@@ -70,7 +73,8 @@ sealed class Definition(
         qualifier,
         lazy,
         keyword,
-        binding
+        binding,
+        targetFile
     )
 
 

@@ -10,7 +10,6 @@ import com.aleyn.lib_base.BaseVbActivity
 import com.aleyn.lib_base.pojo.UserData
 import com.aleyn.module_first.R
 import com.aleyn.module_first.databinding.ActivityParamBinding
-import com.aleyn.module_first.ui.`ParamActivity__LRouter$$Autowired`.autowiredInject
 
 @Route("/First/Simple")
 class SimpleActivity : AppCompatActivity() {

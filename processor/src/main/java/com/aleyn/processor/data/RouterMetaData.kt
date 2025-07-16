@@ -1,5 +1,6 @@
 package com.aleyn.processor.data
 
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 
 /**
@@ -12,7 +13,8 @@ sealed class RouterMeta {
         var path: String = "",
         var desc: String = "",
         var other: Int = 0,
-        var className: String = ""
+        var className: String = "",
+        var targetFile: KSFile? = null,
     ) : RouterMeta()
 
     data class Module(
@@ -33,12 +35,14 @@ sealed class RouterMeta {
         val pkgName: String,
         val simpleName: String,
         val priority: Byte = 0,
+        var targetFile: KSFile? = null,
     ) : RouterMeta()
 
     data class Initializer(
         val priority: Byte = 0,
         val className: String,
         val async: Boolean,
+        var targetFile: KSFile? = null,
     ) : RouterMeta()
 
 
