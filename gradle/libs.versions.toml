@@ -1,6 +1,6 @@
 [versions]
 ####
-lrouterVersion = "1.0.9"
+lrouterVersion = "1.0.10"
 lrouterGroup = "com.github.aleyn97.router"
 ####
 

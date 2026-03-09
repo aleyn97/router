@@ -27,4 +27,9 @@ interface NavCallback {
      */
     fun onInterrupt(navigator: Navigator) {}
 
+    /**
+     * 导航异常
+     */
+    fun onError(navigator: Navigator, error: Exception) {}
+
 }

@@ -11,10 +11,10 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import com.aleyn.router.LRouter
 import com.aleyn.router.appContext
-import com.aleyn.router.core.RouterController.async
 import com.aleyn.router.core.RouterController.main
 import com.aleyn.router.core.RouterUrl.Companion.toRouterUrl
 import com.aleyn.router.util.dLog
+import com.aleyn.router.util.eLog
 import com.aleyn.router.util.iLog
 import java.io.Serializable
 
@@ -116,16 +116,21 @@ class Navigator private constructor(
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
-        if (resultLauncher == null) {
-            "Navigator startActivity ${route.className}".dLog()
-            currentContext.startActivity(intent, optionsCompat?.toBundle())
-        } else {
-            "Navigator startActivityForResult ${route.className}".dLog()
-            resultLauncher.launch(intent, optionsCompat)
-        }
-        navCallback?.onArrival(this)
-        if ((enterAnim != -1 || exitAnim != -1) && currentContext is Activity) {
-            currentContext.overridePendingTransition(enterAnim, exitAnim)
+        try {
+            if (resultLauncher == null) {
+                "Navigator startActivity ${route.className}".dLog()
+                currentContext.startActivity(intent, optionsCompat?.toBundle())
+            } else {
+                "Navigator startActivityForResult ${route.className}".dLog()
+                resultLauncher.launch(intent, optionsCompat)
+            }
+            navCallback?.onArrival(this)
+            if ((enterAnim != -1 || exitAnim != -1) && currentContext is Activity) {
+                currentContext.overridePendingTransition(enterAnim, exitAnim)
+            }
+        } catch (e: Exception) {
+            navCallback?.onError(this, e)
+            "Navigator ${route.className} error: ${e.message}".eLog()
         }
     }
 
@@ -254,7 +259,7 @@ class Navigator private constructor(
         fun navigation(context: Context? = null, callback: NavCallback? = null) {
             val currentContext = context ?: appContext
             val navCallback = callback ?: RouterController.navCallback
-            async {
+            /*async {
                 var navigator: Navigator = build()
                 for (item in RouterController.routerInterceptors) {
                     val tempNavigator = item.interceptor.intercept(navigator)
@@ -267,6 +272,18 @@ class Navigator private constructor(
                 main {
                     navigator.goNavigator(currentContext!!, navCallback)
                 }
+            }*/
+            var navigator: Navigator = build()
+            for (item in RouterController.routerInterceptors) {
+                val tempNavigator = item.interceptor.intercept(navigator)
+                if (tempNavigator == null) {
+                    main { navCallback?.onInterrupt(navigator) }
+                    return
+                }
+                navigator = tempNavigator
+            }
+            main {
+                navigator.goNavigator(currentContext!!, navCallback)
             }
         }
 
