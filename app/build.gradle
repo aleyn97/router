@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace 'com.aleyn.app'
-    compileSdk libs.versions.compileSdk.get().toInteger()
+    compileSdk = libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
         applicationId "com.aleyn.app"
-        minSdk libs.versions.minSdk.get().toInteger()
-        targetSdk libs.versions.targetSdk.get().toInteger()
+        minSdk = libs.versions.minSdk.get().toInteger()
+        targetSdk =  libs.versions.targetSdk.get().toInteger()
         versionCode 1
         versionName "1.0"
 
@@ -32,8 +32,13 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
     kotlin {
-        jvmToolchain(11)
+        jvmToolchain(17)
     }
 }
 
