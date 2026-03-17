@@ -3,6 +3,7 @@ package com.aleyn.router
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.Keep
+import com.aleyn.router.core.LRouterAction
 import com.aleyn.router.core.LRouterInitializer
 import com.aleyn.router.core.LRouterInterceptor
 import com.aleyn.router.core.NavCallback
@@ -96,6 +97,26 @@ object LRouter {
     fun addInterceptor(priority: Byte, interceptor: LRouterInterceptor) {
         RouterController.routerInterceptors.add(InterceptorData(priority, interceptor))
     }
+
+
+    /**
+     * 添加 Action
+     */
+    @JvmStatic
+    fun addRouterAction(path: String, vararg action: LRouterAction) {
+        val current = RouterController.routerActions[path].orEmpty().toMutableList()
+        current.addAll(action)
+        RouterController.routerActions[path] = current
+    }
+
+    /**
+     * 移除Action
+     */
+    @JvmStatic
+    fun removeRouterAction(path: String) {
+        RouterController.routerActions.remove(path)
+    }
+
 
     /**
      * 注册初始化器

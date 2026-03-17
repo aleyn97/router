@@ -24,7 +24,7 @@
 
 说明下不支持低版本 AGP 的原因：ARouter 官方近两年没更新过库了，感觉官方没有更新的想法了。
 写 LRouter 的初衷也是为了做 ARouter 的延续。不至于让在 AGP 8 以上没有合适的路由框架可用。
-如果项目是低 AGP 版本可以继续用 ARouter。
+如果项目是使用低 AGP 版本可以继续用 ARouter。
 
 ## 功能介绍
 
@@ -78,8 +78,8 @@ plugins {
 
 ```groovy
 plugins {
-    //...
-    id 'aleyn-router'
+  //...
+  id 'aleyn-router'
 }
 ```
 
@@ -299,13 +299,13 @@ class AppModelInit : LRouterInitializer {
 }
 ```
 
-如果某个模块必须要在另一个模块初始化完之后才开始初始化操作。这时这两个模块就要放在同一个线程执行了，也就是要么都异步，要么都在主线程。
+如果某个模块，需要在另一个模块初始化完之后才开始初始化操作。这时这两个模块就要放在同一个线程执行了，也就是要么都异步，要么都在主线程。
 
 #### 依赖注入
 
 LRouter
 提供简单的注入功能，只是为了模块间的解耦和通信。如果项目需要更完善的注入功能就可以不用 `LRouter`
-的注入了。像 `Dagger2` 、`Hilt`、`Koin` 等都是很优秀的注入库。有作用域管理及其他比较完善的功能。
+的注入了。像 `Dagger2` 、`Hilt`、`Koin` 等。都是很优秀的 注入库。有作用域管理及其他比较完善的功能。
 
 `LRouter` 正是借鉴了 `Koin` 的实现，`Koin`是一个适合Kotlin 项目使用的注入库。只用了简单几个核心类，修改部分代码，配合
 KSP 就实现了注入功能。
@@ -378,6 +378,36 @@ class RoomProviderImpl2 : IRoomProvider {
 }
 ```
 
+#### Action
+
+注册 Action
+
+```kotlin
+
+@Route(path = "custom://action/test")
+class TestAction : LRouterAction {
+    override fun action(context: Context, arguments: Bundle) {
+        val game = arguments.getString("Game").orEmpty()
+        val role = arguments.getInt("role")
+
+        Toast.makeText(context, "TestAction${game},${role}", Toast.LENGTH_SHORT).show()
+    }
+}
+
+```
+
+执行 Action
+
+```kotlin
+   LRouter.build("custom://action/test")
+    .withString("game", "CF")
+    .withInt("role", 1002)
+    .navigation()
+// or
+LRouter.navigator("custom://action/test?game=CF&role=1002")
+
+```
+
 #### 生成路由表
 
 路由表导出，做成了一个单独的Task,要拿到路由表的时候，直接在 AS 里双击 下图Task任务:
@@ -385,20 +415,6 @@ class RoomProviderImpl2 : IRoomProvider {
 ![genRouterTable](static/router_task.png)
 
 会输出到主工程的 `build/router` 目录下。
-
-## 添加子Module
-
-使用`@LRouterModule` 可以添加子Module 类:
-
-```kotlin 
-//可在 1.0.7 版本使用
-@LRouterModule(
-    module_first__ModuleRouter__Registered::class,
-    module_main__ModuleRouter__Registered::class,
-    module_two__ModuleRouter__Registered::class,
-)
-class RouterModule
-```
 
 ## 其他（选择性使用）
 

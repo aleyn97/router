@@ -82,6 +82,14 @@ class MainFragment : Fragment(R.layout.fragment_home) {
             LRouter.navigator("/First/DI")
         }
 
+        binding.btnAction.setOnClickListener {
+//            LRouter.build("custom://action/test")
+//                .withString("game", "CF")
+//                .withInt("role", 1002)
+//                .navigation()
+            LRouter.navigator("custom://action/test?game=CF&role=1002")
+        }
+
 
         binding.btnJavaTwo.setOnClickListener {
             val userData = UserData("Aleyn", 25, 1)

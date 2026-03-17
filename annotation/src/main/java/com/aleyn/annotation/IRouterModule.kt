@@ -16,7 +16,4 @@ interface IRouterModule {
     fun injectAutowired(target: Any?)
 
     fun addInterceptor()
-
-    fun childModule(): List<IRouterModule>
-
 }

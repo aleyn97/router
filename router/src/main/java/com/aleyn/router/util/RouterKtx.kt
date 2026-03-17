@@ -44,6 +44,7 @@ fun Navigator.Builder.navArrival(onArrival: (navigator: Navigator) -> Unit) {
     navigation(null, navBack(onArrival = onArrival))
 }
 
+
 private fun navBack(
     onInterrupt: (navigator: Navigator) -> Unit = {},
     onLost: (navigator: Navigator) -> Unit = {},

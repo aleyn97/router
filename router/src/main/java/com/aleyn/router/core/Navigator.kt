@@ -43,7 +43,7 @@ class Navigator private constructor(
 
     val optionsCompat: ActivityOptionsCompat? = builder.optionsCompat
 
-    val routeMeta = LRouter.getRouteMeta(routerUrl)
+    val routeMeta get() = LRouter.getRouteMeta(routerUrl)
 
     /**
      * ActivityResultLauncher
@@ -92,8 +92,8 @@ class Navigator private constructor(
         "Navigator to $path".iLog()
         val route = routeMeta
         if (route == null) {
-            "$path Lost".iLog()
-            navCallback?.onLost(this)
+            "Navigator $path Lost".iLog()
+            callAction(currentContext, navCallback)
             return
         }
         navCallback?.onFound(this)
@@ -131,6 +131,35 @@ class Navigator private constructor(
         } catch (e: Exception) {
             navCallback?.onError(this, e)
             "Navigator ${route.className} error: ${e.message}".eLog()
+        }
+    }
+
+    /**
+     * 执行 Action 操作
+     */
+    private fun callAction(currentContext: Context, navCallback: NavCallback? = null) {
+        "callAction to $path".iLog()
+        val routerKey = routerUrl.routerKey
+        val routerActions = RouterController.routerActions[routerKey]
+        if (routerActions.isNullOrEmpty()) {
+            "callAction $path Lost".iLog()
+            navCallback?.onLost(this)
+            return
+        }
+        navCallback?.onFound(this)
+
+        routerUrl.queryAllParameter()?.also {
+            bundle.putAll(it)
+        }
+
+        try {
+            routerActions.forEach {
+                it.action(currentContext, bundle)
+            }
+            navCallback?.onArrival(this)
+        } catch (e: Exception) {
+            navCallback?.onError(this, e)
+            "action $routerKey error: ${e.message}".eLog()
         }
     }
 
@@ -259,20 +288,7 @@ class Navigator private constructor(
         fun navigation(context: Context? = null, callback: NavCallback? = null) {
             val currentContext = context ?: appContext
             val navCallback = callback ?: RouterController.navCallback
-            /*async {
-                var navigator: Navigator = build()
-                for (item in RouterController.routerInterceptors) {
-                    val tempNavigator = item.interceptor.intercept(navigator)
-                    if (tempNavigator == null) {
-                        main { navCallback?.onInterrupt(navigator) }
-                        return@async
-                    }
-                    navigator = tempNavigator
-                }
-                main {
-                    navigator.goNavigator(currentContext!!, navCallback)
-                }
-            }*/
+
             var navigator: Navigator = build()
             for (item in RouterController.routerInterceptors) {
                 val tempNavigator = item.interceptor.intercept(navigator)
@@ -282,9 +298,7 @@ class Navigator private constructor(
                 }
                 navigator = tempNavigator
             }
-            main {
-                navigator.goNavigator(currentContext!!, navCallback)
-            }
+            navigator.goNavigator(currentContext!!, navCallback)
         }
 
         @Suppress("UNCHECKED_CAST")

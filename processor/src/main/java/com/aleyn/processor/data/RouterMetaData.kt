@@ -15,6 +15,7 @@ sealed class RouterMeta {
         var other: Int = 0,
         var className: String = "",
         var targetFile: KSFile? = null,
+        var isAction: Boolean = false,
     ) : RouterMeta()
 
     data class Module(
@@ -22,7 +23,6 @@ sealed class RouterMeta {
         val definitions: List<Definition>,
         val interceptors: List<Interceptor>,
         val initializers: List<Initializer>,
-        val childModule: List<ChildModule>,
     ) : RouterMeta()
 
     data class RouterAutowired(
@@ -44,9 +44,6 @@ sealed class RouterMeta {
         val async: Boolean,
         var targetFile: KSFile? = null,
     ) : RouterMeta()
-
-
-    data class ChildModule(val classNames: List<String>) : RouterMeta()
 
 }
 

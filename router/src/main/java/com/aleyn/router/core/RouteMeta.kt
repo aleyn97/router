@@ -28,3 +28,10 @@ data class RouteMeta(
             return field
         }
 }
+
+
+@Keep
+data class ActionMeta(
+    val path: String = "",
+    val description: String = "",
+)

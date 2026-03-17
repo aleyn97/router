@@ -14,6 +14,7 @@ import com.aleyn.router.util.iLog
 import com.google.gson.Gson
 import java.util.ServiceLoader
 import java.util.TreeSet
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 
 /**
@@ -37,6 +38,8 @@ internal object RouterController {
     internal val routerInterceptors = TreeSet<InterceptorData>()
 
     private val initializerModule = TreeSet<InitializerData>()
+
+    internal val routerActions = ConcurrentHashMap<String, List<LRouterAction>>()
 
     internal var navCallback: NavCallback? = null
 
@@ -86,8 +89,6 @@ internal object RouterController {
             "LRouter use ServiceLoader init -----> time: ${endTime - startTime}ms".iLog()
         }
 
-        // 注册子Module
-        registerChildModule()
         //初始化依赖注入，由于初始化器可能会用到 注入类，所以放在最前
         modules.forEach { it.initDefinition() }
         Core.createEagerInstances()
@@ -109,13 +110,6 @@ internal object RouterController {
                 it.addInterceptor()
             }
         }
-    }
-
-    /**
-     * 子Module
-     */
-    private fun registerChildModule() {
-        modules.flatMap { it.childModule() }.forEach(::registerModule)
     }
 
     /**

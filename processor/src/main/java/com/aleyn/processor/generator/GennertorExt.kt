@@ -1,6 +1,5 @@
 package com.aleyn.processor.generator
 
-import com.aleyn.annotation.IRouterModule
 import com.aleyn.processor.data.RouterMeta
 import com.aleyn.processor.scanner.SINGLETON
 import com.google.devtools.ksp.processing.CodeGenerator
@@ -11,7 +10,6 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
@@ -135,7 +133,6 @@ fun RouterMeta.Module.generatorModule(
         && this.interceptors.isEmpty()
         && this.initializers.isEmpty()
         && routerAutowired.isEmpty()
-        && this.childModule.isEmpty()
     ) return
 
     val className = moduleName.orEmpty() + MODULE_ROUTER_CLASS_SUFFIX
@@ -157,13 +154,21 @@ fun RouterMeta.Module.generatorModule(
         .addModifiers(KModifier.OVERRIDE)
 
     router.forEach {
-        routerFunSpec.addCode(
-            "${LINE_START}RouteMeta(\"%1L\", \"%2L\", %3L, \"%4L\").let(LRouter::registerRoute)\n",
-            it.path,
-            it.desc,
-            it.other,
-            it.className,
-        )
+        if (!it.isAction) {
+            routerFunSpec.addCode(
+                "${LINE_START}RouteMeta(\"%1L\", \"%2L\", %3L, \"%4L\").let(LRouter::registerRoute)\n",
+                it.path,
+                it.desc,
+                it.other,
+                it.className,
+            )
+        } else {
+            routerFunSpec.addCode(
+                "${LINE_START}LRouter.addRouterAction(\"%1L\", %2L())\n",
+                it.path,
+                it.className,
+            )
+        }
     }
 
     val instanceProperty = PropertySpec.builder("INSTANCE", ClassName(pkgName, className))
@@ -183,7 +188,6 @@ fun RouterMeta.Module.generatorModule(
         .addFunction(genInterceptor(fileBuilder))
         .addFunction(genInitializer(fileBuilder))
         .addFunction(routerAutowired.genRouterAutowired(fileBuilder))
-        .addFunction(genChildModules(fileBuilder))
         .build()
 
     val fileSpec = fileBuilder
@@ -315,25 +319,6 @@ private fun List<RouterMeta.RouterAutowired>.genRouterAutowired(fileBuilder: Fil
                     """.trimIndent()
                 )
             }
-        }
-        .build()
-}
-
-
-/**
- * 生成初始化器集合
- */
-private fun RouterMeta.Module.genChildModules(fileBuilder: FileSpec.Builder): FunSpec {
-    return FunSpec.builder("childModule")
-        .addModifiers(KModifier.OVERRIDE)
-        .returns(List::class.parameterizedBy(IRouterModule::class))
-        .apply {
-            fileBuilder.addImport("com.aleyn.router", "LRouter")
-            addCode("val list = arrayListOf<IRouterModule>()\n")
-            childModule.flatMap { it.classNames }.forEach { className ->
-                addCode("list.add(${className}.INSTANCE)\n")
-            }
-            addCode("return list")
         }
         .build()
 }
