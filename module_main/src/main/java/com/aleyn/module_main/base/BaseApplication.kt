@@ -36,5 +36,10 @@ class BaseApplication : Application() {
                 Log.d(TAG, "onInterrupt: ${navigator.path}")
             }
         })
+
+//         动态注册 action
+//        val action = Class.forName("com.aleyn.module_two.TestAction").getDeclaredConstructor()
+//            .newInstance() as LRouterAction
+//        LRouter.addRouterAction("custom://action/test", action)
     }
 }
