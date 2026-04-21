@@ -4,6 +4,7 @@ import android.app.Activity
 import com.aleyn.router.LRouter
 import com.aleyn.router.core.routerGson
 import com.aleyn.router.inject.qualifier.sq
+import com.google.gson.reflect.TypeToken
 
 /**
  * @author : Aleyn
@@ -31,7 +32,8 @@ object DefaultParamParser {
         val currentKey = key.ifBlank { fieldName }
         val json = getBundleAny(target, currentKey) as? String
         if (!json.isNullOrBlank()) {
-            return runCatching { routerGson.fromJson(json, T::class.java) }.getOrNull()
+            val type = object : TypeToken<T>() {}.type
+            return runCatching { routerGson.fromJson<T>(json, type) }.getOrNull()
         }
         return if (key.isBlank()) {
             LRouter.get(T::class)
@@ -58,11 +60,11 @@ private fun String.toPrimitive(clazz: Class<*>): Any? {
             "kotlin.Byte" -> this.toByte()
             "kotlin.Short" -> this.toShort()
             "kotlin.Int" -> this.toInt()
-            "kotlin.Long" -> this.toFloat()
+            "kotlin.Long" -> this.toLong()
             "kotlin.Float" -> this.toFloat()
             "kotlin.Double" -> this.toDouble()
             "kotlin.Boolean" -> this.toBoolean()
-            "kotlin.Char" -> this.toCharArray()
+            "kotlin.Char", "java.lang.Character", "char" -> this.singleOrNull()
             else -> this
         }
     } catch (_: Throwable) {

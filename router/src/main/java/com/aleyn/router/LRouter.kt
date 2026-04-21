@@ -40,9 +40,12 @@ object LRouter {
 
     var enabledAutoInit = true
 
+    private val initLock = Any()
+
     /**
      * 初始化标识
      */
+    @Volatile
     private var isInit = false
 
     /**
@@ -147,9 +150,12 @@ object LRouter {
     fun init(context: Context?) {
         applicationContext = context?.applicationContext
         if (isInit) return
-        "init: start".dLog()
-        RouterController.init(applicationContext!!)
-        isInit = true
+        synchronized(initLock) {
+            if (isInit) return
+            "init: start".dLog()
+            RouterController.init(applicationContext!!)
+            isInit = true
+        }
     }
 
     /**

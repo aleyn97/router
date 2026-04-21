@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultLauncher
@@ -126,7 +127,7 @@ class Navigator private constructor(
             }
             navCallback?.onArrival(this)
             if ((enterAnim != -1 || exitAnim != -1) && currentContext is Activity) {
-                currentContext.overridePendingTransition(enterAnim, exitAnim)
+                currentContext.applyRouteTransition(enterAnim, exitAnim)
             }
         } catch (e: Exception) {
             navCallback?.onError(this, e)
@@ -323,5 +324,18 @@ class Navigator private constructor(
         @JvmStatic
         internal fun navBuilder(url: String?, intent: Intent?) = Builder(url.orEmpty(), intent)
 
+    }
+}
+
+private fun Activity.applyRouteTransition(enterAnim: Int, exitAnim: Int) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        overrideActivityTransition(
+            Activity.OVERRIDE_TRANSITION_OPEN,
+            enterAnim.coerceAtLeast(0),
+            exitAnim.coerceAtLeast(0)
+        )
+    } else {
+        @Suppress("DEPRECATION")
+        overridePendingTransition(enterAnim, exitAnim)
     }
 }

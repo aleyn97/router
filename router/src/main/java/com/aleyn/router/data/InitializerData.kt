@@ -1,6 +1,7 @@
 package com.aleyn.router.data
 
 import com.aleyn.router.core.LRouterInitializer
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * @author : Aleyn
@@ -11,18 +12,24 @@ internal class InitializerData(
     val async: Boolean,
     val routerInitializer: LRouterInitializer
 ) : Comparable<InitializerData> {
+    private val registerOrder = nextOrder.getAndIncrement()
 
     override fun compareTo(other: InitializerData): Int {
-        return when {
-            other.routerInitializer == this.routerInitializer -> 0
-            other.priority >= this.priority -> 1
-            else -> -1
-        }
+        if (other.routerInitializer == this.routerInitializer) return 0
+
+        val priorityCompare = other.priority.compareTo(priority)
+        if (priorityCompare != 0) return priorityCompare
+
+        return registerOrder.compareTo(other.registerOrder)
     }
 
     override fun toString(): String {
         return """
             priority=${priority},async=${async}
         """.trimIndent()
+    }
+
+    private companion object {
+        val nextOrder = AtomicLong(0)
     }
 }

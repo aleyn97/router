@@ -104,11 +104,9 @@ internal object RouterController {
         }
         initializerModule.clear()
         //注册 路由 拦截器
-        async {
-            modules.forEach {
-                it.registerRouter()
-                it.addInterceptor()
-            }
+        modules.forEach {
+            it.registerRouter()
+            it.addInterceptor()
         }
     }
 

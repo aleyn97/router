@@ -1,6 +1,6 @@
 [versions]
 ####
-lrouterVersion = "1.1.0"
+lrouterVersion = "1.1.1"
 lrouterGroup = "com.github.aleyn97.router"
 ####
 
@@ -13,6 +13,7 @@ asmVersion = "9.9.1"
 constraintlayoutVersion = "2.1.4"
 coreKtxVersion = "1.16.0"
 espressoCoreVersion = "3.5.1"
+androidxTestRunnerVersion = "1.5.2"
 gradleVersion = "8.0.2"
 gsonVersion = "2.9.1"
 junit = "1.1.5"
@@ -31,6 +32,7 @@ asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asmVersion" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayoutVersion" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunnerVersion" }
 ext-junit = { module = "androidx.test.ext:junit", version.ref = "junit" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradleVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }

@@ -13,6 +13,10 @@ android {
     namespace 'com.aleyn.router'
     compileSdk = libs.versions.compileSdk.get().toInteger()
 
+    publishing {
+        singleVariant("release") {}
+    }
+
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInteger()
         targetSdk = libs.versions.targetSdk.get().toInteger()
@@ -43,6 +47,10 @@ dependencies {
     compileOnly libs.appcompat
     implementation libs.gson
     api project(path: ':annotation')
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.appcompat
 }
 
 apply from: '../publishing.gradle'

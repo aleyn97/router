@@ -191,8 +191,8 @@ class MainActivity : BaseActivity() {
 }
 ```
 
-八大基本数据类型和 String 还有序列化对象,都是直接放在 Bundle 里的。其他没有序列化的对象或者List、Map等集合类型会转成
-Json 字符串,取参的时候再解析。
+八大基本数据类型和 String 还有序列化对象,都是直接放在 Bundle 里的。其他没有序列化的对象或者 List、Map 等集合类型会转成
+Json 字符串,取参的时候会按声明类型解析，支持泛型集合和嵌套对象。
 
 #### 获取Fragment
 

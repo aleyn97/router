@@ -1,6 +1,7 @@
 package com.aleyn.router.data
 
 import com.aleyn.router.core.LRouterInterceptor
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * @author : Aleyn
@@ -10,11 +11,18 @@ internal class InterceptorData(
     private val priority: Byte,
     val interceptor: LRouterInterceptor
 ) : Comparable<InterceptorData> {
+    private val registerOrder = nextOrder.getAndIncrement()
+
     override fun compareTo(other: InterceptorData): Int {
-        return when {
-            other.interceptor == this.interceptor -> 0
-            other.priority >= this.priority -> 1
-            else -> -1
-        }
+        if (other.interceptor == this.interceptor) return 0
+
+        val priorityCompare = other.priority.compareTo(priority)
+        if (priorityCompare != 0) return priorityCompare
+
+        return registerOrder.compareTo(other.registerOrder)
+    }
+
+    private companion object {
+        val nextOrder = AtomicLong(0)
     }
 }
